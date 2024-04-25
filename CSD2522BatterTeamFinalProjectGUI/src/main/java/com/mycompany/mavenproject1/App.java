@@ -5,7 +5,8 @@ Purpose: create a GUI to accept input from a user and write it into a Sqlite dat
 Updated by:
 Luke Dawson - 4/24/24 - created the skeleton for the GUI
 Luke Dawson - 4/25/24 - added button functionality to add the data to the database
-    and added starter check box
+    and added starter check box. Changed default value of each text box to 0 and
+    made reset button return them all to 0 rather than empty them
 */
 
 package com.mycompany.mavenproject1;
@@ -56,25 +57,25 @@ public class App extends Application {
     private Label leftOnBaseLabel = new Label("Left on Base:");
     
     // create textfields
-    private TextField gameNumberField = new TextField();
-    private TextField playerNumberField = new TextField();
+    private TextField gameNumberField = new TextField("0");
+    private TextField playerNumberField = new TextField("0");
     private CheckBox starterCheckBox = new CheckBox("");
-    private TextField battingOrderField = new TextField();
-    private TextField atBatField = new TextField();
-    private TextField runField = new TextField();
-    private TextField singleField = new TextField();
-    private TextField doubleField = new TextField();
-    private TextField tripleField = new TextField();
-    private TextField homeRunField = new TextField();
-    private TextField basesOnBallField= new TextField();
-    private TextField hitsByPitchField = new TextField();
-    private TextField runsBattedInField = new TextField();
-    private TextField strikeOutField = new TextField();
-    private TextField groundedDoublePlayField = new TextField();
-    private TextField stolenBaseAttemptField = new TextField();
-    private TextField stolenBaseSuccessField = new TextField();
-    private TextField sacrificeFliesField = new TextField();
-    private TextField leftOnBaseField = new TextField();
+    private TextField battingOrderField = new TextField("0");
+    private TextField atBatField = new TextField("0");
+    private TextField runField = new TextField("0");
+    private TextField singleField = new TextField("0");
+    private TextField doubleField = new TextField("0");
+    private TextField tripleField = new TextField("0");
+    private TextField homeRunField = new TextField("0");
+    private TextField basesOnBallField= new TextField("0");
+    private TextField hitsByPitchField = new TextField("0");
+    private TextField runsBattedInField = new TextField("0");
+    private TextField strikeOutField = new TextField("0");
+    private TextField groundedDoublePlayField = new TextField("0");
+    private TextField stolenBaseAttemptField = new TextField("0");
+    private TextField stolenBaseSuccessField = new TextField("0");
+    private TextField sacrificeFliesField = new TextField("0");
+    private TextField leftOnBaseField = new TextField("0");
     
     // create the primary stage for the main menu
     private Stage primaryStage;
@@ -125,7 +126,7 @@ public class App extends Application {
     
     // method to connect to the sql database
     private Connection getConnection() throws SQLException {
-        String dbUrl = "jdbc:sqlite:baseball_batter_stats.sqlite";
+        String dbUrl = "jdbc:sqlite:baseball_batter_stats.sqlite"; // enter file name here
         Connection connection = DriverManager.getConnection(dbUrl);
         return connection;
     }
@@ -296,25 +297,25 @@ public class App extends Application {
     // function to reset all data entry boxes
     private void resetButtonClicked() {
         // reset all data input
-        gameNumberField.clear();
-        playerNumberField.clear();
+        gameNumberField.setText("0");
+        playerNumberField.setText("0");
         starterCheckBox.setSelected(false);
-        battingOrderField.clear();
-        atBatField.clear();
-        runField.clear();
-        singleField.clear();
-        doubleField.clear();
-        tripleField.clear();
-        homeRunField.clear();
-        basesOnBallField.clear();
-        hitsByPitchField.clear();
-        runsBattedInField.clear();
-        strikeOutField.clear();
-        groundedDoublePlayField.clear();
-        stolenBaseAttemptField.clear();
-        stolenBaseSuccessField.clear();
-        sacrificeFliesField.clear();
-        leftOnBaseField.clear();
+        battingOrderField.setText("0");
+        atBatField.setText("0");
+        runField.setText("0");
+        singleField.setText("0");
+        doubleField.setText("0");
+        tripleField.setText("0");
+        homeRunField.setText("0");
+        basesOnBallField.setText("0");
+        hitsByPitchField.setText("0");
+        runsBattedInField.setText("0");
+        strikeOutField.setText("0");
+        groundedDoublePlayField.setText("0");
+        stolenBaseAttemptField.setText("0");
+        stolenBaseSuccessField.setText("0");
+        sacrificeFliesField.setText("0");
+        leftOnBaseField.setText("0");
     }
     
     // function to end the program
