@@ -5,6 +5,7 @@ Purpose: create a GUI to accept input from a user and write it into a Sqlite dat
 Updated by:
 Luke Dawson - 4/24/24 - created the skeleton for the GUI
 Luke Dawson - 4/25/24 - added button functionality to add the data to the database
+    and added starter check box
 */
 
 package com.mycompany.mavenproject1;
@@ -25,6 +26,7 @@ import javafx.stage.Stage;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.RadioButton;
 import javafx.scene.control.ToggleGroup;
+import javafx.scene.control.CheckBox;
 import java.sql.*;
 
 
@@ -35,6 +37,7 @@ public class App extends Application {
     // create labels
     private Label gameNumberLabel = new Label("Game #");
     private Label playerNumberLabel = new Label("Player #");
+    private Label starterLabel = new Label("Starter");
     private Label battingOrderLabel = new Label("Batting Order #");
     private Label atBatLabel = new Label("At-Bats:");
     private Label runLabel = new Label("Runs:");
@@ -53,8 +56,9 @@ public class App extends Application {
     private Label leftOnBaseLabel = new Label("Left on Base:");
     
     // create textfields
-    private TextField gameNumberField = new TextField();;
-    private TextField playerNumberField = new TextField();;
+    private TextField gameNumberField = new TextField();
+    private TextField playerNumberField = new TextField();
+    private CheckBox starterCheckBox = new CheckBox("");
     private TextField battingOrderField = new TextField();
     private TextField atBatField = new TextField();
     private TextField runField = new TextField();
@@ -121,7 +125,7 @@ public class App extends Application {
     
     // method to connect to the sql database
     private Connection getConnection() throws SQLException {
-        String dbUrl = "jdbc:sqlite:baseball_batter_stats.sqlite"; // enter file name here
+        String dbUrl = "jdbc:sqlite:baseball_batter_stats.sqlite";
         Connection connection = DriverManager.getConnection(dbUrl);
         return connection;
     }
@@ -138,6 +142,7 @@ public class App extends Application {
         VBox labelBox = new VBox(18);
         labelBox.getChildren().add(gameNumberLabel);
         labelBox.getChildren().add(playerNumberLabel);
+        labelBox.getChildren().add(starterLabel);
         labelBox.getChildren().add(battingOrderLabel);
         labelBox.getChildren().add(atBatLabel);
         labelBox.getChildren().add(runLabel);
@@ -159,6 +164,7 @@ public class App extends Application {
         VBox textFieldBox = new VBox(10);
         textFieldBox.getChildren().add(gameNumberField);
         textFieldBox.getChildren().add(playerNumberField);
+        textFieldBox.getChildren().add(starterCheckBox);
         textFieldBox.getChildren().add(battingOrderField);
         textFieldBox.getChildren().add(atBatField);
         textFieldBox.getChildren().add(runField);
@@ -205,6 +211,12 @@ public class App extends Application {
             // Retrieve the data entered in each field
             String gameNumber = gameNumberField.getText();
             String playerNumber = playerNumberField.getText();
+            String starterStatus;
+            if (starterCheckBox.isSelected()) {
+                starterStatus = "TRUE";
+            } else {
+                starterStatus = "False";
+            }
             String battingOrder = battingOrderField.getText();
             String atBat = atBatField.getText();
             String run = runField.getText();
@@ -223,8 +235,8 @@ public class App extends Application {
             String leftOnBase = leftOnBaseField.getText();
 
             // SQL INSERT statement
-            String sql = "INSERT INTO ENTERTABLENAME (game_number, player_number, batting_order, at_bat, run, single, _double, triple, home_run, bases_on_ball, hits_by_pitch, runs_batted_in, strike_out, grounded_double_play, stolen_base_attempt, stolen_base_success, sacrifice_flies, left_on_base) "
-                    + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+            String sql = "INSERT INTO ENTERTABLENAME (game_number, player_number, starter, batting_order, at_bat, run, single, _double, triple, home_run, bases_on_ball, hits_by_pitch, runs_batted_in, strike_out, grounded_double_play, stolen_base_attempt, stolen_base_success, sacrifice_flies, left_on_base) "
+                    + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
             // Get connection
             try (Connection connection = getConnection();
@@ -232,22 +244,23 @@ public class App extends Application {
                 // Set parameters
                 ps.setString(1, gameNumber);
                 ps.setString(2, playerNumber);
-                ps.setString(3, battingOrder);
-                ps.setString(4, atBat);
-                ps.setString(5, run);
-                ps.setString(6, single);
-                ps.setString(7, _double);
-                ps.setString(8, triple);
-                ps.setString(9, homeRun);
-                ps.setString(10, basesOnBall);
-                ps.setString(11, hitsByPitch);
-                ps.setString(12, runsBattedIn);
-                ps.setString(13, strikeOut);
-                ps.setString(14, groundedDoublePlay);
-                ps.setString(15, stolenBaseAttempt);
-                ps.setString(16, stolenBaseSuccess);
-                ps.setString(17, sacrificeFlies);
-                ps.setString(18, leftOnBase);
+                ps.setString(3, starterStatus);
+                ps.setString(4, battingOrder);
+                ps.setString(5, atBat);
+                ps.setString(6, run);
+                ps.setString(7, single);
+                ps.setString(8, _double);
+                ps.setString(9, triple);
+                ps.setString(10, homeRun);
+                ps.setString(11, basesOnBall);
+                ps.setString(12, hitsByPitch);
+                ps.setString(13, runsBattedIn);
+                ps.setString(14, strikeOut);
+                ps.setString(15, groundedDoublePlay);
+                ps.setString(16, stolenBaseAttempt);
+                ps.setString(17, stolenBaseSuccess);
+                ps.setString(18, sacrificeFlies);
+                ps.setString(19, leftOnBase);
 
                 // execute the INSERT statement
                 ps.executeUpdate();
@@ -285,6 +298,7 @@ public class App extends Application {
         // reset all data input
         gameNumberField.clear();
         playerNumberField.clear();
+        starterCheckBox.setSelected(false);
         battingOrderField.clear();
         atBatField.clear();
         runField.clear();
