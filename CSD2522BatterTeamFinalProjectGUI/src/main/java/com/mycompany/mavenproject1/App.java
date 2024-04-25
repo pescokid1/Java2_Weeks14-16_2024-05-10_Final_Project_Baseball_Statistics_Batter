@@ -4,6 +4,7 @@ Date created: 4/24/24
 Purpose: create a GUI to accept input from a user and write it into a Sqlite database
 Updated by:
 Luke Dawson - 4/24/24 - created the skeleton for the GUI
+Luke Dawson - 4/25/24 - added button functionality to add the data to the database
 */
 
 package com.mycompany.mavenproject1;
@@ -24,6 +25,7 @@ import javafx.stage.Stage;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.RadioButton;
 import javafx.scene.control.ToggleGroup;
+import java.sql.*;
 
 
 /**
@@ -117,6 +119,13 @@ public class App extends Application {
         
     }
     
+    // method to connect to the sql database
+    private Connection getConnection() throws SQLException {
+        String dbUrl = "jdbc:sqlite:baseball_batter_stats.sqlite"; // enter file name here
+        Connection connection = DriverManager.getConnection(dbUrl);
+        return connection;
+    }
+    
     // method for when the user selects the "Enter Data" button
     private void enterDataButtonClicked() {
         // create a new scene for entering data
@@ -192,9 +201,78 @@ public class App extends Application {
     
     // when the user has all data entered, write the data to the database
     private void submitButtonClicked() {
-        // then navigate back to the main menu
-        start(primaryStage);
+        try {
+            // Retrieve the data entered in each field
+            String gameNumber = gameNumberField.getText();
+            String playerNumber = playerNumberField.getText();
+            String battingOrder = battingOrderField.getText();
+            String atBat = atBatField.getText();
+            String run = runField.getText();
+            String single = singleField.getText();
+            String _double = doubleField.getText(); // "double" is a reserved keyword, so use "_double" instead
+            String triple = tripleField.getText();
+            String homeRun = homeRunField.getText();
+            String basesOnBall = basesOnBallField.getText();
+            String hitsByPitch = hitsByPitchField.getText();
+            String runsBattedIn = runsBattedInField.getText();
+            String strikeOut = strikeOutField.getText();
+            String groundedDoublePlay = groundedDoublePlayField.getText();
+            String stolenBaseAttempt = stolenBaseAttemptField.getText();
+            String stolenBaseSuccess = stolenBaseSuccessField.getText();
+            String sacrificeFlies = sacrificeFliesField.getText();
+            String leftOnBase = leftOnBaseField.getText();
+
+            // SQL INSERT statement
+            String sql = "INSERT INTO ENTERTABLENAME (game_number, player_number, batting_order, at_bat, run, single, _double, triple, home_run, bases_on_ball, hits_by_pitch, runs_batted_in, strike_out, grounded_double_play, stolen_base_attempt, stolen_base_success, sacrifice_flies, left_on_base) "
+                    + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+
+            // Get connection
+            try (Connection connection = getConnection();
+                 PreparedStatement ps = connection.prepareStatement(sql)) {
+                // Set parameters
+                ps.setString(1, gameNumber);
+                ps.setString(2, playerNumber);
+                ps.setString(3, battingOrder);
+                ps.setString(4, atBat);
+                ps.setString(5, run);
+                ps.setString(6, single);
+                ps.setString(7, _double);
+                ps.setString(8, triple);
+                ps.setString(9, homeRun);
+                ps.setString(10, basesOnBall);
+                ps.setString(11, hitsByPitch);
+                ps.setString(12, runsBattedIn);
+                ps.setString(13, strikeOut);
+                ps.setString(14, groundedDoublePlay);
+                ps.setString(15, stolenBaseAttempt);
+                ps.setString(16, stolenBaseSuccess);
+                ps.setString(17, sacrificeFlies);
+                ps.setString(18, leftOnBase);
+
+                // execute the INSERT statement
+                ps.executeUpdate();
+
+                // show success message
+                Alert successAlert = new Alert(Alert.AlertType.INFORMATION);
+                successAlert.setTitle("Success");
+                successAlert.setHeaderText("Commit successful");
+                successAlert.setContentText("Data inserted successfully");
+                successAlert.showAndWait();
+
+                // clear fields
+                resetButtonClicked();
+            }
+        } catch (SQLException e) {
+            // show error message
+            Alert errorAlert = new Alert(Alert.AlertType.ERROR);
+            errorAlert.setTitle("Error");
+            errorAlert.setHeaderText("Commit failed");
+            errorAlert.setContentText("There was an error in adding the data to the database. Please check your information and try again");
+            errorAlert.showAndWait();
+        }
     }
+    
+    
     
     // function to return back to the main menu
     private void returnButtonClicked() {
