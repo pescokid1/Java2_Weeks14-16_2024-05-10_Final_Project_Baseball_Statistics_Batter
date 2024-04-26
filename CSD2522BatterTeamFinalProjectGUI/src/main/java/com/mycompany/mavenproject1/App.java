@@ -7,6 +7,8 @@ Luke Dawson - 4/24/24 - created the skeleton for the GUI
 Luke Dawson - 4/25/24 - added button functionality to add the data to the database
     and added starter check box. Changed default value of each text box to 0 and
     made reset button return them all to 0 rather than empty them
+Luke Dawson - 4/26/24 - added integer parsing for the text fields before adding
+    data to the database
 */
 
 package com.mycompany.mavenproject1;
@@ -97,7 +99,7 @@ public class App extends Application {
         Scene scene = new Scene(grid);
 
         // create buttons for different actions
-        Button enterDataButton = new Button("Enter Data");
+        Button enterDataButton = new Button("Enter Batter Stats");
         Button viewGameReportButton = new Button("View Game Report");
         Button viewMultiGameReportButton = new Button("View Multi-Game Report");
         
@@ -210,30 +212,25 @@ public class App extends Application {
     private void submitButtonClicked() {
         try {
             // Retrieve the data entered in each field
-            String gameNumber = gameNumberField.getText();
-            String playerNumber = playerNumberField.getText();
-            String starterStatus;
-            if (starterCheckBox.isSelected()) {
-                starterStatus = "TRUE";
-            } else {
-                starterStatus = "False";
-            }
-            String battingOrder = battingOrderField.getText();
-            String atBat = atBatField.getText();
-            String run = runField.getText();
-            String single = singleField.getText();
-            String _double = doubleField.getText(); // "double" is a reserved keyword, so use "_double" instead
-            String triple = tripleField.getText();
-            String homeRun = homeRunField.getText();
-            String basesOnBall = basesOnBallField.getText();
-            String hitsByPitch = hitsByPitchField.getText();
-            String runsBattedIn = runsBattedInField.getText();
-            String strikeOut = strikeOutField.getText();
-            String groundedDoublePlay = groundedDoublePlayField.getText();
-            String stolenBaseAttempt = stolenBaseAttemptField.getText();
-            String stolenBaseSuccess = stolenBaseSuccessField.getText();
-            String sacrificeFlies = sacrificeFliesField.getText();
-            String leftOnBase = leftOnBaseField.getText();
+            int gameNumber = Integer.parseInt(gameNumberField.getText());
+            int playerNumber = Integer.parseInt(playerNumberField.getText());
+            boolean starterStatus = starterCheckBox.isSelected();
+            int battingOrder = Integer.parseInt(battingOrderField.getText());
+            int atBat = Integer.parseInt(atBatField.getText());
+            int run = Integer.parseInt(runField.getText());
+            int single = Integer.parseInt(singleField.getText());
+            int doubleCount = Integer.parseInt(doubleField.getText()); // "double" is a reserved keyword, so use "doubleCount" instead
+            int triple = Integer.parseInt(tripleField.getText());
+            int homeRun = Integer.parseInt(homeRunField.getText());
+            int basesOnBall = Integer.parseInt(basesOnBallField.getText());
+            int hitsByPitch = Integer.parseInt(hitsByPitchField.getText());
+            int runsBattedIn = Integer.parseInt(runsBattedInField.getText());
+            int strikeOut = Integer.parseInt(strikeOutField.getText());
+            int groundedDoublePlay = Integer.parseInt(groundedDoublePlayField.getText());
+            int stolenBaseAttempt = Integer.parseInt(stolenBaseAttemptField.getText());
+            int stolenBaseSuccess = Integer.parseInt(stolenBaseSuccessField.getText());
+            int sacrificeFlies = Integer.parseInt(sacrificeFliesField.getText());
+            int leftOnBase = Integer.parseInt(leftOnBaseField.getText());
 
             // SQL INSERT statement
             String sql = "INSERT INTO ENTERTABLENAME (game_number, player_number, starter, batting_order, at_bat, run, single, _double, triple, home_run, bases_on_ball, hits_by_pitch, runs_batted_in, strike_out, grounded_double_play, stolen_base_attempt, stolen_base_success, sacrifice_flies, left_on_base) "
@@ -243,25 +240,25 @@ public class App extends Application {
             try (Connection connection = getConnection();
                  PreparedStatement ps = connection.prepareStatement(sql)) {
                 // Set parameters
-                ps.setString(1, gameNumber);
-                ps.setString(2, playerNumber);
-                ps.setString(3, starterStatus);
-                ps.setString(4, battingOrder);
-                ps.setString(5, atBat);
-                ps.setString(6, run);
-                ps.setString(7, single);
-                ps.setString(8, _double);
-                ps.setString(9, triple);
-                ps.setString(10, homeRun);
-                ps.setString(11, basesOnBall);
-                ps.setString(12, hitsByPitch);
-                ps.setString(13, runsBattedIn);
-                ps.setString(14, strikeOut);
-                ps.setString(15, groundedDoublePlay);
-                ps.setString(16, stolenBaseAttempt);
-                ps.setString(17, stolenBaseSuccess);
-                ps.setString(18, sacrificeFlies);
-                ps.setString(19, leftOnBase);
+                ps.setInt(1, gameNumber);
+                ps.setInt(2, playerNumber);
+                ps.setBoolean(3, starterStatus);
+                ps.setInt(4, battingOrder);
+                ps.setInt(5, atBat);
+                ps.setInt(6, run);
+                ps.setInt(7, single);
+                ps.setInt(8, doubleCount);
+                ps.setInt(9, triple);
+                ps.setInt(10, homeRun);
+                ps.setInt(11, basesOnBall);
+                ps.setInt(12, hitsByPitch);
+                ps.setInt(13, runsBattedIn);
+                ps.setInt(14, strikeOut);
+                ps.setInt(15, groundedDoublePlay);
+                ps.setInt(16, stolenBaseAttempt);
+                ps.setInt(17, stolenBaseSuccess);
+                ps.setInt(18, sacrificeFlies);
+                ps.setInt(19, leftOnBase);
 
                 // execute the INSERT statement
                 ps.executeUpdate();
@@ -276,7 +273,7 @@ public class App extends Application {
                 // clear fields
                 resetButtonClicked();
             }
-        } catch (SQLException e) {
+        } catch (NumberFormatException | SQLException e) {
             // show error message
             Alert errorAlert = new Alert(Alert.AlertType.ERROR);
             errorAlert.setTitle("Error");
@@ -285,8 +282,6 @@ public class App extends Application {
             errorAlert.showAndWait();
         }
     }
-    
-    
     
     // function to return back to the main menu
     private void returnButtonClicked() {
@@ -328,4 +323,3 @@ public class App extends Application {
     }
 
 }
-
