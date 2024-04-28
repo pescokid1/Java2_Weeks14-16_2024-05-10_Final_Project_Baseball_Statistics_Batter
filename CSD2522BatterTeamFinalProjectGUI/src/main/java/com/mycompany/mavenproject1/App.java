@@ -9,6 +9,7 @@ Luke Dawson - 4/25/24 - added button functionality to add the data to the databa
     made reset button return them all to 0 rather than empty them
 Luke Dawson - 4/26/24 - added integer parsing for the text fields before adding
     data to the database
+Luke Dawson - 4/28/24 - added formatting to clean up the GUI and make it more manageable
 */
 
 package com.mycompany.mavenproject1;
@@ -96,7 +97,7 @@ public class App extends Application {
         grid.setVgap(10);
     
         // create the scene
-        Scene scene = new Scene(grid);
+        Scene scene = new Scene(grid, 250, 190);
 
         // create buttons for different actions
         Button enterDataButton = new Button("Enter Batter Stats");
@@ -142,49 +143,55 @@ public class App extends Application {
         enterDataGrid.setHgap(10);
         enterDataGrid.setVgap(10);
         
-        VBox labelBox = new VBox(18);
-        labelBox.getChildren().add(gameNumberLabel);
-        labelBox.getChildren().add(playerNumberLabel);
-        labelBox.getChildren().add(starterLabel);
-        labelBox.getChildren().add(battingOrderLabel);
-        labelBox.getChildren().add(atBatLabel);
-        labelBox.getChildren().add(runLabel);
-        labelBox.getChildren().add(singleLabel);
-        labelBox.getChildren().add(doubleLabel);
-        labelBox.getChildren().add(tripleLabel);
-        labelBox.getChildren().add(homeRunLabel);
-        labelBox.getChildren().add(basesOnBallLabel);
-        labelBox.getChildren().add(hitsByPitchLabel);
-        labelBox.getChildren().add(runsBattedInLabel);
-        labelBox.getChildren().add(strikeOutLabel);
-        labelBox.getChildren().add(groundedDoublePlayLabel);
-        labelBox.getChildren().add(stolenBaseAttemptLabel);
-        labelBox.getChildren().add(stolenBaseSuccessLabel);
-        labelBox.getChildren().add(sacrificeFliesLabel);
-        labelBox.getChildren().add(leftOnBaseLabel);
-        enterDataGrid.add(labelBox, 0, 0);
+        VBox labelBox1 = new VBox(18);
+        labelBox1.getChildren().add(gameNumberLabel);
+        labelBox1.getChildren().add(playerNumberLabel);
+        labelBox1.getChildren().add(starterLabel);
+        labelBox1.getChildren().add(battingOrderLabel);
+        labelBox1.getChildren().add(atBatLabel);
+        labelBox1.getChildren().add(runLabel);
+        labelBox1.getChildren().add(singleLabel);
+        labelBox1.getChildren().add(doubleLabel);
+        labelBox1.getChildren().add(tripleLabel);
+        labelBox1.getChildren().add(homeRunLabel);
+        enterDataGrid.add(labelBox1, 0, 0);
         
-        VBox textFieldBox = new VBox(10);
-        textFieldBox.getChildren().add(gameNumberField);
-        textFieldBox.getChildren().add(playerNumberField);
-        textFieldBox.getChildren().add(starterCheckBox);
-        textFieldBox.getChildren().add(battingOrderField);
-        textFieldBox.getChildren().add(atBatField);
-        textFieldBox.getChildren().add(runField);
-        textFieldBox.getChildren().add(singleField);
-        textFieldBox.getChildren().add(doubleField);
-        textFieldBox.getChildren().add(tripleField);
-        textFieldBox.getChildren().add(homeRunField);
-        textFieldBox.getChildren().add(basesOnBallField);
-        textFieldBox.getChildren().add(hitsByPitchField);
-        textFieldBox.getChildren().add(runsBattedInField);
-        textFieldBox.getChildren().add(strikeOutField);
-        textFieldBox.getChildren().add(groundedDoublePlayField);
-        textFieldBox.getChildren().add(stolenBaseAttemptField);
-        textFieldBox.getChildren().add(stolenBaseSuccessField);
-        textFieldBox.getChildren().add(sacrificeFliesField);
-        textFieldBox.getChildren().add(leftOnBaseField);
-        enterDataGrid.add(textFieldBox, 1, 0);
+        VBox labelBox2 = new VBox(18);
+        labelBox2.getChildren().add(basesOnBallLabel);
+        labelBox2.getChildren().add(hitsByPitchLabel);
+        labelBox2.getChildren().add(runsBattedInLabel);
+        labelBox2.getChildren().add(strikeOutLabel);
+        labelBox2.getChildren().add(groundedDoublePlayLabel);
+        labelBox2.getChildren().add(stolenBaseAttemptLabel);
+        labelBox2.getChildren().add(stolenBaseSuccessLabel);
+        labelBox2.getChildren().add(sacrificeFliesLabel);
+        labelBox2.getChildren().add(leftOnBaseLabel);
+        enterDataGrid.add(labelBox2, 2, 0);
+        
+        VBox textFieldBox1 = new VBox(10);
+        textFieldBox1.getChildren().add(gameNumberField);
+        textFieldBox1.getChildren().add(playerNumberField);
+        textFieldBox1.getChildren().add(starterCheckBox);
+        textFieldBox1.getChildren().add(battingOrderField);
+        textFieldBox1.getChildren().add(atBatField);
+        textFieldBox1.getChildren().add(runField);
+        textFieldBox1.getChildren().add(singleField);
+        textFieldBox1.getChildren().add(doubleField);
+        textFieldBox1.getChildren().add(tripleField);
+        textFieldBox1.getChildren().add(homeRunField);
+        enterDataGrid.add(textFieldBox1, 1, 0);
+        
+        VBox textFieldBox2 = new VBox(10);
+        textFieldBox2.getChildren().add(basesOnBallField);
+        textFieldBox2.getChildren().add(hitsByPitchField);
+        textFieldBox2.getChildren().add(runsBattedInField);
+        textFieldBox2.getChildren().add(strikeOutField);
+        textFieldBox2.getChildren().add(groundedDoublePlayField);
+        textFieldBox2.getChildren().add(stolenBaseAttemptField);
+        textFieldBox2.getChildren().add(stolenBaseSuccessField);
+        textFieldBox2.getChildren().add(sacrificeFliesField);
+        textFieldBox2.getChildren().add(leftOnBaseField);
+        enterDataGrid.add(textFieldBox2, 3, 0);
 
         // add a submit button
         Button submitButton = new Button("Submit");
