@@ -12,6 +12,7 @@ Luke Dawson - 4/26/24 - added integer parsing for the text fields before adding
 Luke Dawson - 4/28/24 - added formatting to clean up the GUI and make it more manageable
 Terry Pescosolido - 4/28/24 - changed calls to database for integration
 Luke Dawson - 4/29/24 - added "Add new Batter" menu
+Terry Pescosolido - 4/29/24 - fixed interaction for new player name combo box with db
 */
 
 package com.mycompany.mavenproject1;
@@ -162,7 +163,7 @@ public class App extends Application {
         enterDataGrid.setVgap(10);
         
         for (Player player : players) {
-            playerComboBox.getItems().add(player.getPlayerName()); // Add player names to ComboBox
+            playerComboBox.getItems().add(player.getPlayerName() + " #" + player.getPlayerNumber()); // Add player names to ComboBox
         }
         enterDataGrid.add(playerComboBox, 1, 1, 1, 1);
         
@@ -286,7 +287,8 @@ public class App extends Application {
 //        try {
             // Retrieve the data entered in each field
             int gameNumber = Integer.parseInt(gameNumberField.getText());
-            // add code to get values from the combo box
+            String playerNameNumber = playerComboBox.getSelectionModel().getSelectedItem();
+            int batter_pn = Integer.parseInt(playerNameNumber.split("#")[1]);
             int batter_gs = starterCheckBox.isSelected() ? 1 : 0; // convert boolean to int
             int batter_bo = Integer.parseInt(battingOrderField.getText());
             int batter_ab = Integer.parseInt(atBatField.getText());
