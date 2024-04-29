@@ -10,6 +10,7 @@ Luke Dawson - 4/25/24 - added button functionality to add the data to the databa
 Luke Dawson - 4/26/24 - added integer parsing for the text fields before adding
     data to the database
 Luke Dawson - 4/28/24 - added formatting to clean up the GUI and make it more manageable
+Terry Pescosolido - 4/28/24 - changed calls to database for integration
 */
 
 package com.mycompany.mavenproject1;
