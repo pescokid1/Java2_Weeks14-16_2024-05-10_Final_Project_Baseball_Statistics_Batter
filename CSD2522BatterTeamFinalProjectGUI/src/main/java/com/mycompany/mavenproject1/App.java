@@ -32,6 +32,7 @@ import javafx.scene.control.RadioButton;
 import javafx.scene.control.ToggleGroup;
 import javafx.scene.control.CheckBox;
 import java.sql.*;
+import java.util.List;
 
 
 /**
@@ -80,6 +81,10 @@ public class App extends Application {
     private TextField sacrificeFliesField = new TextField("0");
     private TextField leftOnBaseField = new TextField("0");
     
+    BaseballStatsDB baseball_stats_db = new BaseballStatsDB();
+    List<Batter> batters = null; 
+    List<Player> players = null; 
+    
     // create the primary stage for the main menu
     private Stage primaryStage;
 
@@ -127,12 +132,12 @@ public class App extends Application {
         
     }
     
-    // method to connect to the sql database
-    private Connection getConnection() throws SQLException {
-        String dbUrl = "jdbc:sqlite:baseball_batter_stats.sqlite"; // enter file name here
-        Connection connection = DriverManager.getConnection(dbUrl);
-        return connection;
-    }
+//    // method to connect to the sql database
+//    private Connection getConnection() throws SQLException {
+//        String dbUrl = "jdbc:sqlite:baseball_batter_stats.sqlite"; // enter file name here
+//        Connection connection = DriverManager.getConnection(dbUrl);
+//        return connection;
+//    }
     
     // method for when the user selects the "Enter Data" button
     private void enterDataButtonClicked() {
@@ -217,58 +222,37 @@ public class App extends Application {
     
     // when the user has all data entered, write the data to the database
     private void submitButtonClicked() {
-        try {
+//        try {
             // Retrieve the data entered in each field
             int gameNumber = Integer.parseInt(gameNumberField.getText());
-            int playerNumber = Integer.parseInt(playerNumberField.getText());
-            boolean starterStatus = starterCheckBox.isSelected();
-            int battingOrder = Integer.parseInt(battingOrderField.getText());
-            int atBat = Integer.parseInt(atBatField.getText());
-            int run = Integer.parseInt(runField.getText());
-            int single = Integer.parseInt(singleField.getText());
-            int doubleCount = Integer.parseInt(doubleField.getText()); // "double" is a reserved keyword, so use "doubleCount" instead
-            int triple = Integer.parseInt(tripleField.getText());
-            int homeRun = Integer.parseInt(homeRunField.getText());
-            int basesOnBall = Integer.parseInt(basesOnBallField.getText());
-            int hitsByPitch = Integer.parseInt(hitsByPitchField.getText());
-            int runsBattedIn = Integer.parseInt(runsBattedInField.getText());
-            int strikeOut = Integer.parseInt(strikeOutField.getText());
-            int groundedDoublePlay = Integer.parseInt(groundedDoublePlayField.getText());
-            int stolenBaseAttempt = Integer.parseInt(stolenBaseAttemptField.getText());
-            int stolenBaseSuccess = Integer.parseInt(stolenBaseSuccessField.getText());
-            int sacrificeFlies = Integer.parseInt(sacrificeFliesField.getText());
-            int leftOnBase = Integer.parseInt(leftOnBaseField.getText());
-
-            // SQL INSERT statement
-            String sql = "INSERT INTO ENTERTABLENAME (game_number, player_number, starter, batting_order, at_bat, run, single, _double, triple, home_run, bases_on_ball, hits_by_pitch, runs_batted_in, strike_out, grounded_double_play, stolen_base_attempt, stolen_base_success, sacrifice_flies, left_on_base) "
-                    + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
-
-            // Get connection
-            try (Connection connection = getConnection();
-                 PreparedStatement ps = connection.prepareStatement(sql)) {
-                // Set parameters
-                ps.setInt(1, gameNumber);
-                ps.setInt(2, playerNumber);
-                ps.setBoolean(3, starterStatus);
-                ps.setInt(4, battingOrder);
-                ps.setInt(5, atBat);
-                ps.setInt(6, run);
-                ps.setInt(7, single);
-                ps.setInt(8, doubleCount);
-                ps.setInt(9, triple);
-                ps.setInt(10, homeRun);
-                ps.setInt(11, basesOnBall);
-                ps.setInt(12, hitsByPitch);
-                ps.setInt(13, runsBattedIn);
-                ps.setInt(14, strikeOut);
-                ps.setInt(15, groundedDoublePlay);
-                ps.setInt(16, stolenBaseAttempt);
-                ps.setInt(17, stolenBaseSuccess);
-                ps.setInt(18, sacrificeFlies);
-                ps.setInt(19, leftOnBase);
-
-                // execute the INSERT statement
-                ps.executeUpdate();
+            int batter_pn = Integer.parseInt(playerNumberField.getText());
+            int batter_gs = starterCheckBox.isSelected() ? 1 : 0; // convert boolean to int
+            int batter_bo = Integer.parseInt(battingOrderField.getText());
+            int batter_ab = Integer.parseInt(atBatField.getText());
+            int batter_runs = Integer.parseInt(runField.getText());
+            int batter_1b = Integer.parseInt(singleField.getText());
+            int batter_2b = Integer.parseInt(doubleField.getText()); 
+            int batter_3b = Integer.parseInt(tripleField.getText());
+            int batter_hr = Integer.parseInt(homeRunField.getText());
+            int batter_bb = Integer.parseInt(basesOnBallField.getText());
+            int batter_hp = Integer.parseInt(hitsByPitchField.getText());
+            int batter_rbi = Integer.parseInt(runsBattedInField.getText());
+            int batter_so = Integer.parseInt(strikeOutField.getText());
+            int batter_gdp = Integer.parseInt(groundedDoublePlayField.getText());
+            int batter_sba = Integer.parseInt(stolenBaseAttemptField.getText());
+            int batter_sb = Integer.parseInt(stolenBaseSuccessField.getText());
+            int batter_sf = Integer.parseInt(sacrificeFliesField.getText());
+            int batter_sh = Integer.parseInt(sacrificeFliesField.getText());
+            int batter_lob = Integer.parseInt(leftOnBaseField.getText());
+            
+            // Insert record into 
+            //try (
+                baseball_stats_db.addGamePlayerStats(gameNumber, batter_pn, 
+                              batter_bo, batter_gs,
+                              batter_ab, batter_runs, batter_1b, batter_2b, 
+                              batter_3b, batter_hr, batter_bb, batter_hp, batter_rbi,
+                              batter_so, batter_gdp, batter_sb, 
+                              batter_sf, batter_sh, batter_lob);
 
                 // show success message
                 Alert successAlert = new Alert(Alert.AlertType.INFORMATION);
@@ -279,15 +263,15 @@ public class App extends Application {
 
                 // clear fields
                 resetButtonClicked();
-            }
-        } catch (NumberFormatException | SQLException e) {
-            // show error message
-            Alert errorAlert = new Alert(Alert.AlertType.ERROR);
-            errorAlert.setTitle("Error");
-            errorAlert.setHeaderText("Commit failed");
-            errorAlert.setContentText("There was an error in adding the data to the database. Please check your information and try again");
-            errorAlert.showAndWait();
-        }
+//            }
+//        } catch (NumberFormatException | SQLException e) {
+//            // show error message
+//            Alert errorAlert = new Alert(Alert.AlertType.ERROR);
+//            errorAlert.setTitle("Error");
+//            errorAlert.setHeaderText("Commit failed");
+//            errorAlert.setContentText("There was an error in adding the data to the database. Please check your information and try again");
+//            errorAlert.showAndWait();
+//        }
     }
     
     // function to return back to the main menu
