@@ -5,6 +5,7 @@
     Description: This method contains all the access for the Baseball Batter Stats database.
 
 Terry Pescosolido - 4/30/24 - added Schedule (Game) interaction for database
+Terry Pescosolido - 4/30/24 - changed getPlayers to order by player name
 */
 
 package com.mycompany.mavenproject1;
@@ -136,7 +137,7 @@ public class BaseballStatsDB {
         players = new ArrayList<>();
         openConnection();
         try (PreparedStatement ps = connection.prepareStatement(
-                "SELECT * FROM Baseball_Player")) { 
+                "SELECT * FROM Baseball_Player ORDER BY Player_Name")) { 
             ResultSet rs = ps.executeQuery();
             while (rs.next()) {
                 Player p = new Player(rs.getInt(1), rs.getString(2), rs.getBoolean(3));
