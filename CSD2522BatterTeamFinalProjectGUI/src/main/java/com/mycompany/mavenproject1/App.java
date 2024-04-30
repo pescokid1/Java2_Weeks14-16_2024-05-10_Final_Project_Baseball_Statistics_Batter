@@ -74,7 +74,7 @@ public class App extends Application {
     private Label gameDateLabel = new Label("Game Date:");
     
     // create textfields
-    private TextField gameField = new TextField("0");
+    private ComboBox<String> gameComboBox = new ComboBox<>();
     ComboBox<String> playerComboBox = new ComboBox<>();
     private CheckBox starterCheckBox = new CheckBox("");
     private TextField battingOrderField = new TextField("0");
@@ -205,7 +205,7 @@ public class App extends Application {
         enterDataGrid.add(labelBox2, 2, 0);
         
         VBox textFieldBox1 = new VBox(10);
-        textFieldBox1.getChildren().add(gameField);
+        textFieldBox1.getChildren().add(gameComboBox);
         textFieldBox1.getChildren().add(playerComboBox);
         textFieldBox1.getChildren().add(starterCheckBox);
         textFieldBox1.getChildren().add(battingOrderField);
@@ -333,7 +333,7 @@ public class App extends Application {
     private void submitButtonClicked() {
 //        try {
             // Retrieve the data entered in each field
-            int gameNumber = Integer.parseInt(gameField.getText());
+            String gameInfo = gameComboBox.getSelectionModel().getSelectedItem();
             String playerNameNumber = playerComboBox.getSelectionModel().getSelectedItem();
             int batter_pn = Integer.parseInt(playerNameNumber.split("#")[1]);
             int batter_gs = starterCheckBox.isSelected() ? 1 : 0; // convert boolean to int
@@ -357,7 +357,7 @@ public class App extends Application {
             
             // Insert record into 
             //try (
-                baseball_stats_db.addGamePlayerStats(gameNumber, batter_pn, 
+                baseball_stats_db.addGamePlayerStats(gameInfo, batter_pn, 
                               batter_bo, batter_gs,
                               batter_ab, batter_runs, batter_1b, batter_2b, 
                               batter_3b, batter_hr, batter_bb, batter_hp, batter_rbi,
@@ -416,6 +416,9 @@ public class App extends Application {
         LocalDate gameDate = gameDatePicker.getValue();
         
         String gameInfo = ("Game " + gameNumber + " - " + gameDate + " vs " + opponent);
+        
+        // Add gameInfo to gameComboBox
+        gameComboBox.getItems().add(gameInfo);
     }
     
     // function to return back to the main menu
@@ -427,7 +430,7 @@ public class App extends Application {
     // function to reset all data entry boxes
     private void resetButtonClicked() {
         // reset all data input
-        gameField.setText("0");
+        gameComboBox.getSelectionModel().clearSelection();
         playerComboBox.getSelectionModel().clearSelection();
         starterCheckBox.setSelected(false);
         battingOrderField.setText("0");
