@@ -3,6 +3,8 @@
     Created on:  05/10/2024
     Purpose:     Baseball Batter Stats DB method
     Description: This method contains all the access for the Baseball Batter Stats database.
+
+Terry Pescosolido - 4/30/24 - added Schedule (Game) interaction for database
 */
 
 package com.mycompany.mavenproject1;
@@ -17,6 +19,7 @@ public class BaseballStatsDB {
     
     private List<Batter> batters = null;
     private List<Player> players = null;
+    private List<Game> games = null;
     private List<Batter> batters_season = null;
 
     public void openConnection() {
@@ -53,12 +56,13 @@ public class BaseballStatsDB {
                         " PRIMARY KEY (Game_Number, Player_Number))" );
                 //                " batter_positions TEXT NOT NULL" +
                 stmt.execute("CREATE TABLE IF NOT EXISTS Baseball_Team_Schedule (" +
-                        " season_year INTEGER PRIMARY KEY NOT NULL," +
-                        " game_number INTEGER NOT NULL," +
-                        " game_date TExT NOT NULL," + // fix date format
-                        " game_time TEXT NOT NULL," + // fix time format
-                        " game_opponent_team_number INTEGER NOT NULL," + 
-                        " game_location TEXT NOT NULL)"); 
+                        //" season_year INTEGER PRIMARY KEY NOT NULL," +
+                        " Game_Number INTEGER NOT NULL," +
+                        " Game_Opponent_Name INTEGER NOT NULL," +
+                        " Game_Date TExT NOT NULL)"); // fix date format
+                        //" game_time TEXT NOT NULL," + // fix time format
+                        //" game_opponent_team_number INTEGER NOT NULL," + 
+                       // " game_location TEXT NOT NULL)"); 
                 stmt.execute("CREATE TABLE IF NOT EXISTS Baseball_League (" +
                         " league_team_number INTEGER PRIMARY KEY NOT NULL," +
                         " League_team_name TEXT NOT NULL)");
@@ -77,6 +81,40 @@ public class BaseballStatsDB {
         } catch (SQLException e) {
             System.err.println("closeConnection failed: " + e);          
         }
+    }
+   
+    public void addGame(int game_number, String game_opponent_name, String game_date) {
+        openConnection(); 
+        String insertGame=
+                "INSERT INTO Baseball_Team_Schedule (Game_Number, Game_Opponent_Name, Game_Date) " +
+                  "VALUES (?, ?, ?)";
+        try (PreparedStatement ps = connection.prepareStatement(insertGame)) {
+            ps.setInt(1, game_number);
+            ps.setString(2, game_opponent_name);
+            ps.setString(3, game_date);
+            ps.executeUpdate();
+        } catch (SQLException e) {
+            System.err.println("addGame failed: " + e);
+        }
+        closeConnection();
+    } 
+    
+    public List<Game> getGames() {
+        games = new ArrayList<>();
+        openConnection();
+        try (PreparedStatement ps = connection.prepareStatement(
+                "SELECT * FROM Baseball_Team_Schedule")) { 
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                Game g = new Game(rs.getInt(1), rs.getString(2), rs.getString(3));
+                games.add(g);
+            }
+            rs.close();
+        } catch (SQLException e) {
+            System.err.println("getGamess failed: " + e);
+        }
+        closeConnection();
+        return games;
     }
    
     public void addPlayer(String player_firstName, String player_lastName, int player_number) {
