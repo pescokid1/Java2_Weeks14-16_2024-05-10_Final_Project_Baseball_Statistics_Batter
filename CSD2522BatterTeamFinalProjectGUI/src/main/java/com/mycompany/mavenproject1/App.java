@@ -13,6 +13,7 @@ Luke Dawson - 4/28/24 - added formatting to clean up the GUI and make it more ma
 Terry Pescosolido - 4/28/24 - changed calls to database for integration
 Luke Dawson - 4/29/24 - added "Add new Batter" menu
 Terry Pescosolido - 4/29/24 - fixed interaction for new player name combo box with db
+Luke Dawson - 4/30/24 - added a menu option to enter a new game
 */
 
 package com.mycompany.mavenproject1;
@@ -34,6 +35,8 @@ import javafx.scene.control.ComboBox;
 import javafx.scene.control.RadioButton;
 import javafx.scene.control.ToggleGroup;
 import javafx.scene.control.CheckBox;
+import javafx.scene.control.DatePicker;
+import java.time.LocalDate;
 import java.sql.*;
 import java.util.List;
 
@@ -43,7 +46,7 @@ import java.util.List;
  */
 public class App extends Application {
     // create labels
-    private Label gameNumberLabel = new Label("Game #");
+    private Label gameLabel = new Label("Game");
     private Label playerLabel = new Label("Player:");
     private Label starterLabel = new Label("Starter");
     private Label battingOrderLabel = new Label("Batting Order #");
@@ -66,9 +69,12 @@ public class App extends Application {
     private Label lastNameLabel = new Label("Last Name:");
     private Label enterPlayerNumberLabel = new Label("Player Number:");
     private Label activeLabel = new Label("Active");
+    private Label gameNumberLabel = new Label("Game #");
+    private Label opponentLabel = new Label("Opponent");
+    private Label gameDateLabel = new Label("Game Date:");
     
     // create textfields
-    private TextField gameNumberField = new TextField("0");
+    private TextField gameField = new TextField("0");
     ComboBox<String> playerComboBox = new ComboBox<>();
     private CheckBox starterCheckBox = new CheckBox("");
     private TextField battingOrderField = new TextField("0");
@@ -91,6 +97,9 @@ public class App extends Application {
     private TextField lastNameField = new TextField();
     private TextField enterPlayerNumberField = new TextField();
     private CheckBox activeCheckBox = new CheckBox("");
+    private TextField gameNumberField = new TextField();
+    private TextField opponentField = new TextField();
+    private DatePicker gameDatePicker = new DatePicker();
     
     BaseballStatsDB baseball_stats_db = new BaseballStatsDB();
     List<Batter> batters = null; 
@@ -113,11 +122,12 @@ public class App extends Application {
         grid.setVgap(10);
     
         // create the scene
-        Scene scene = new Scene(grid, 250, 230);
+        Scene scene = new Scene(grid, 250, 260);
 
         // create buttons for different actions
         Button enterDataButton = new Button("Enter Batter Stats");
         Button enterPlayerButton = new Button("Enter New Batter");
+        Button enterGameButton = new Button("Enter New Game");
         Button viewGameReportButton = new Button("View Game Report");
         Button viewMultiGameReportButton = new Button("View Multi-Game Report");
         
@@ -125,12 +135,14 @@ public class App extends Application {
         VBox optionBox = new VBox(10);
         optionBox.getChildren().add(enterDataButton);
         optionBox.getChildren().add(enterPlayerButton);
+        optionBox.getChildren().add(enterGameButton);
         optionBox.getChildren().add(viewGameReportButton);
         optionBox.getChildren().add(viewMultiGameReportButton); 
         grid.add(optionBox, 0, 0, 3, 1);
         
         enterDataButton.setOnAction(event -> enterDataButtonClicked());
         enterPlayerButton.setOnAction(event -> enterBatterButtonClicked());
+        enterGameButton.setOnAction(event -> enterGameButtonClicked());
         
         // exit button
         Button exitButton = new Button("Exit");
@@ -168,7 +180,7 @@ public class App extends Application {
         enterDataGrid.add(playerComboBox, 1, 1, 1, 1);
         
         VBox labelBox1 = new VBox(18);
-        labelBox1.getChildren().add(gameNumberLabel);
+        labelBox1.getChildren().add(gameLabel);
         labelBox1.getChildren().add(playerLabel);
         labelBox1.getChildren().add(starterLabel);
         labelBox1.getChildren().add(battingOrderLabel);
@@ -193,7 +205,7 @@ public class App extends Application {
         enterDataGrid.add(labelBox2, 2, 0);
         
         VBox textFieldBox1 = new VBox(10);
-        textFieldBox1.getChildren().add(gameNumberField);
+        textFieldBox1.getChildren().add(gameField);
         textFieldBox1.getChildren().add(playerComboBox);
         textFieldBox1.getChildren().add(starterCheckBox);
         textFieldBox1.getChildren().add(battingOrderField);
@@ -282,11 +294,46 @@ public class App extends Application {
         primaryStage.setScene(enterDataScene);
     }
     
+    private void enterGameButtonClicked() {
+        // create a new scene for entering data
+        GridPane enterGameGrid = new GridPane();
+        enterGameGrid.setAlignment(Pos.TOP_LEFT);
+        enterGameGrid.setPadding(new Insets(25, 25, 25, 25));
+        enterGameGrid.setHgap(10);
+        enterGameGrid.setVgap(10);
+        
+        VBox labelBox = new VBox(20);
+        labelBox.getChildren().add(gameNumberLabel);
+        labelBox.getChildren().add(opponentLabel);
+        labelBox.getChildren().add(gameDateLabel);
+        enterGameGrid.add(labelBox, 0, 0);
+        
+        VBox fieldBox = new VBox(10);
+        fieldBox.getChildren().add(gameNumberField);
+        fieldBox.getChildren().add(opponentField);
+        fieldBox.getChildren().add(gameDatePicker);
+        enterGameGrid.add(fieldBox, 1, 0);
+        
+        Button submitButton = new Button("Submit");
+        submitButton.setOnAction(event -> submitGameButtonClicked());
+        // add a return button
+        Button returnButton = new Button("Return");
+        returnButton.setOnAction(event -> returnButtonClicked());
+        
+        HBox submitReturnBox = new HBox(10);
+        submitReturnBox.getChildren().add(submitButton);
+        submitReturnBox.getChildren().add(returnButton);
+        enterGameGrid.add(submitReturnBox, 0, 1, 2, 1);
+        
+        Scene enterGameScene = new Scene(enterGameGrid, 350, 180);
+        primaryStage.setScene(enterGameScene);
+    }
+    
     // when the user has all data entered, write the data to the database
     private void submitButtonClicked() {
 //        try {
             // Retrieve the data entered in each field
-            int gameNumber = Integer.parseInt(gameNumberField.getText());
+            int gameNumber = Integer.parseInt(gameField.getText());
             String playerNameNumber = playerComboBox.getSelectionModel().getSelectedItem();
             int batter_pn = Integer.parseInt(playerNameNumber.split("#")[1]);
             int batter_gs = starterCheckBox.isSelected() ? 1 : 0; // convert boolean to int
@@ -363,6 +410,14 @@ public class App extends Application {
         resetButtonClicked();
     }
     
+    private void submitGameButtonClicked() {
+        int gameNumber = Integer.parseInt(gameNumberField.getText());
+        String opponent = opponentField.getText();
+        LocalDate gameDate = gameDatePicker.getValue();
+        
+        String gameInfo = ("Game " + gameNumber + " - " + gameDate + " vs " + opponent);
+    }
+    
     // function to return back to the main menu
     private void returnButtonClicked() {
         // navigate back to the main menu
@@ -372,7 +427,7 @@ public class App extends Application {
     // function to reset all data entry boxes
     private void resetButtonClicked() {
         // reset all data input
-        gameNumberField.setText("0");
+        gameField.setText("0");
         playerComboBox.getSelectionModel().clearSelection();
         starterCheckBox.setSelected(false);
         battingOrderField.setText("0");
