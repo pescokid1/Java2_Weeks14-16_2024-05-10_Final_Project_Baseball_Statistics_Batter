@@ -14,6 +14,7 @@ Terry Pescosolido - 4/28/24 - changed calls to database for integration
 Luke Dawson - 4/29/24 - added "Add new Batter" menu
 Terry Pescosolido - 4/29/24 - fixed interaction for new player name combo box with db
 Luke Dawson - 4/30/24 - added a menu option to enter a new game
+Terry Pescosolido - 4/30/24 - fixed interaction for new game combo box with db
 */
 
 package com.mycompany.mavenproject1;
@@ -102,8 +103,9 @@ public class App extends Application {
     private DatePicker gameDatePicker = new DatePicker();
     
     BaseballStatsDB baseball_stats_db = new BaseballStatsDB();
-    List<Batter> batters = null; 
-    private List<Player> players = new ArrayList<>();
+    //List<Batter> batters = null; 
+    //private List<Player> players = new ArrayList<>();
+    //private List<Game> games = new ArrayList<>();
     
     // create the primary stage for the main menu
     private Stage primaryStage;
@@ -172,9 +174,14 @@ public class App extends Application {
         enterDataGrid.setAlignment(Pos.TOP_LEFT);
         enterDataGrid.setPadding(new Insets(25, 25, 25, 25));
         enterDataGrid.setHgap(10);
-        enterDataGrid.setVgap(10);
+        enterDataGrid.setVgap(10); 
         
-        for (Player player : players) {
+        for (Game game : baseball_stats_db.getGames()) {
+            gameComboBox.getItems().add("Game " + game.getGameNumber() + " - " + game.getGameDate() + " - " + game.getGameOpponentName()); // Add game names to ComboBox
+        }
+        enterDataGrid.add(gameComboBox, 1, 1, 1, 1);
+        
+        for (Player player : baseball_stats_db.getPlayers()) {
             playerComboBox.getItems().add(player.getPlayerName() + " #" + player.getPlayerNumber()); // Add player names to ComboBox
         }
         enterDataGrid.add(playerComboBox, 1, 1, 1, 1);
@@ -263,14 +270,14 @@ public class App extends Application {
         labelBox.getChildren().add(firstNameLabel);
         labelBox.getChildren().add(lastNameLabel);
         labelBox.getChildren().add(enterPlayerNumberLabel);
-        labelBox.getChildren().add(activeLabel);
+        //labelBox.getChildren().add(activeLabel);
         enterDataGrid.add(labelBox, 0, 0);
         
         VBox textBox = new VBox(10);
         textBox.getChildren().add(firstNameField);
         textBox.getChildren().add(lastNameField);
         textBox.getChildren().add(enterPlayerNumberField);
-        textBox.getChildren().add(activeCheckBox);
+        //textBox.getChildren().add(activeCheckBox);
         enterDataGrid.add(textBox, 1, 0);
         
         Button submitButton = new Button("Submit");
@@ -334,6 +341,7 @@ public class App extends Application {
 //        try {
             // Retrieve the data entered in each field
             String gameInfo = gameComboBox.getSelectionModel().getSelectedItem();
+            int game_number = Integer.parseInt(gameInfo.split(" ")[1]);
             String playerNameNumber = playerComboBox.getSelectionModel().getSelectedItem();
             int batter_pn = Integer.parseInt(playerNameNumber.split("#")[1]);
             int batter_gs = starterCheckBox.isSelected() ? 1 : 0; // convert boolean to int
@@ -357,7 +365,7 @@ public class App extends Application {
             
             // Insert record into 
             //try (
-                baseball_stats_db.addGamePlayerStats(gameInfo, batter_pn, 
+                baseball_stats_db.addGamePlayerStats(game_number, batter_pn, 
                               batter_bo, batter_gs,
                               batter_ab, batter_runs, batter_1b, batter_2b, 
                               batter_3b, batter_hr, batter_bb, batter_hp, batter_rbi,
@@ -390,20 +398,21 @@ public class App extends Application {
         String firstName = firstNameField.getText();
         String lastName = lastNameField.getText();
         int playerNumber = Integer.parseInt(enterPlayerNumberField.getText());
-        boolean isActive = activeCheckBox.isSelected();
+        //boolean isActive = activeCheckBox.isSelected();
 
-        // Create a new Player object with the entered data
-        Player player = new Player(playerNumber, firstName + " " + lastName, isActive);
-
-        // Add the new player to the list
-        players.add(player);
+        baseball_stats_db.addPlayer(firstName, lastName, playerNumber);
+//        // Create a new Player object with the entered data
+//        Player player = new Player(playerNumber, firstName + " " + lastName, isActive);
+//
+//        // Add the new player to the list
+//        players.add(player);
 
         // Show success message
-        String activeStatus = isActive ? "active" : "inactive";
+        //String activeStatus = isActive ? "active" : "inactive";
         Alert successAlert = new Alert(Alert.AlertType.INFORMATION);
         successAlert.setTitle("Success");
         successAlert.setHeaderText("Player added successfully");
-        successAlert.setContentText("Player " + firstName + " " + lastName + " added with player number " + playerNumber + " and is " + activeStatus);
+        successAlert.setContentText("Player " + firstName + " " + lastName + " added with player number " + playerNumber); // + " and is " + activeStatus);
         successAlert.showAndWait();
 
         // Clear fields
@@ -415,10 +424,27 @@ public class App extends Application {
         String opponent = opponentField.getText();
         LocalDate gameDate = gameDatePicker.getValue();
         
-        String gameInfo = ("Game " + gameNumber + " - " + gameDate + " vs " + opponent);
+        baseball_stats_db.addGame(gameNumber, opponent, String.valueOf(gameDate));
         
-        // Add gameInfo to gameComboBox
-        gameComboBox.getItems().add(gameInfo);
+//        Game game = new Game(gameNumber, opponent, String.valueOf(gameDate));
+//        
+//        // Add the new player to the list
+//        games.add(game);
+
+        // Show success message
+        Alert successAlert = new Alert(Alert.AlertType.INFORMATION);
+        successAlert.setTitle("Success");
+        successAlert.setHeaderText("Game added successfully");
+        successAlert.setContentText("Game " + gameNumber + " added with opponent " + opponent + " and date " + gameDate);
+        successAlert.showAndWait();
+
+        // Clear fields
+        resetButtonClicked();
+        
+//        String gameInfo = ("Game " + gameNumber + " - " + gameDate + " vs " + opponent);
+//        
+//        // Add gameInfo to gameComboBox
+//        gameComboBox.getItems().add(gameInfo);
     }
     
     // function to return back to the main menu
