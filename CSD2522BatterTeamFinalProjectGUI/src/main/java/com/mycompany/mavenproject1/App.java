@@ -15,6 +15,7 @@ Luke Dawson - 4/29/24 - added "Add new Batter" menu
 Terry Pescosolido - 4/29/24 - fixed interaction for new player name combo box with db
 Luke Dawson - 4/30/24 - added a menu option to enter a new game
 Terry Pescosolido - 4/30/24 - fixed interaction for new game combo box with db
+Luke Dawson - 5/3/24 - added error handling to the submit functions
 */
 
 package com.mycompany.mavenproject1;
@@ -338,7 +339,28 @@ public class App extends Application {
     
     // when the user has all data entered, write the data to the database
     private void submitButtonClicked() {
-//        try {
+        try {
+            // ensure all fields have a valid value
+            if (gameComboBox.getSelectionModel().isEmpty() ||
+                playerComboBox.getSelectionModel().isEmpty() ||
+                battingOrderField.getText().isEmpty() ||
+                atBatField.getText().isEmpty() ||
+                runField.getText().isEmpty() ||
+                singleField.getText().isEmpty() ||
+                doubleField.getText().isEmpty() ||
+                tripleField.getText().isEmpty() ||
+                homeRunField.getText().isEmpty() ||
+                basesOnBallField.getText().isEmpty() ||
+                hitsByPitchField.getText().isEmpty() ||
+                runsBattedInField.getText().isEmpty() ||
+                strikeOutField.getText().isEmpty() ||
+                groundedDoublePlayField.getText().isEmpty() ||
+                stolenBaseAttemptField.getText().isEmpty() ||
+                stolenBaseSuccessField.getText().isEmpty() ||
+                sacrificeFliesField.getText().isEmpty() ||
+                leftOnBaseField.getText().isEmpty()) {
+                throw new IllegalArgumentException("All fields must be filled.");
+            }
             // Retrieve the data entered in each field
             String gameInfo = gameComboBox.getSelectionModel().getSelectedItem();
             int game_number = Integer.parseInt(gameInfo.split(" ")[1]);
@@ -381,65 +403,116 @@ public class App extends Application {
 
                 // clear fields
                 resetButtonClicked();
-//            }
-//        } catch (NumberFormatException | SQLException e) {
-//            // show error message
-//            Alert errorAlert = new Alert(Alert.AlertType.ERROR);
-//            errorAlert.setTitle("Error");
-//            errorAlert.setHeaderText("Commit failed");
-//            errorAlert.setContentText("There was an error in adding the data to the database. Please check your information and try again");
-//            errorAlert.showAndWait();
-//        }
+        } catch (NumberFormatException e) {
+            // show error message
+            Alert errorAlert = new Alert(Alert.AlertType.ERROR);
+            errorAlert.setTitle("Error");
+            errorAlert.setHeaderText("Commit failed");
+            errorAlert.setContentText("There was an error in adding the data to the database. Please check your information and try again");
+            errorAlert.showAndWait();
+        } catch (IllegalArgumentException e) {
+            // show error message for empty fields
+            Alert errorAlert = new Alert(Alert.AlertType.ERROR);
+            errorAlert.setTitle("Error");
+            errorAlert.setHeaderText("Commit failed");
+            errorAlert.setContentText(e.getMessage());
+            errorAlert.showAndWait();
+        }
     }
     
     // method to handle the submit button on the enter batter menu
     private void submitPlayerButtonClicked() {
-        // Retrieve the data entered in each field
-        String firstName = firstNameField.getText();
-        String lastName = lastNameField.getText();
-        int playerNumber = Integer.parseInt(enterPlayerNumberField.getText());
-        //boolean isActive = activeCheckBox.isSelected();
+        try {
+            // ensure all fields are filled
+            if (firstNameField.getText().isEmpty() ||
+                lastNameField.getText().isEmpty() ||
+                enterPlayerNumberField.getText().isEmpty()) {
+                throw new IllegalArgumentException("All fields must be filled.");
+            }
+            
+            // Retrieve the data entered in each field
+            String firstName = firstNameField.getText();
+            String lastName = lastNameField.getText();
+            int playerNumber = Integer.parseInt(enterPlayerNumberField.getText());
+            //boolean isActive = activeCheckBox.isSelected();
 
-        baseball_stats_db.addPlayer(firstName, lastName, playerNumber);
-//        // Create a new Player object with the entered data
-//        Player player = new Player(playerNumber, firstName + " " + lastName, isActive);
-//
-//        // Add the new player to the list
-//        players.add(player);
+            baseball_stats_db.addPlayer(firstName, lastName, playerNumber);
+    //        // Create a new Player object with the entered data
+    //        Player player = new Player(playerNumber, firstName + " " + lastName, isActive);
+    //
+    //        // Add the new player to the list
+    //        players.add(player);
 
-        // Show success message
-        //String activeStatus = isActive ? "active" : "inactive";
-        Alert successAlert = new Alert(Alert.AlertType.INFORMATION);
-        successAlert.setTitle("Success");
-        successAlert.setHeaderText("Player added successfully");
-        successAlert.setContentText("Player " + firstName + " " + lastName + " added with player number " + playerNumber); // + " and is " + activeStatus);
-        successAlert.showAndWait();
+            // Show success message
+            //String activeStatus = isActive ? "active" : "inactive";
+            Alert successAlert = new Alert(Alert.AlertType.INFORMATION);
+            successAlert.setTitle("Success");
+            successAlert.setHeaderText("Player added successfully");
+            successAlert.setContentText("Player " + firstName + " " + lastName + " added with player number " + playerNumber); // + " and is " + activeStatus);
+            successAlert.showAndWait();
 
-        // Clear fields
-        resetButtonClicked();
+            // Clear fields
+            resetButtonClicked();
+        } catch (NumberFormatException e) {
+            // show error message for number format exception
+            Alert errorAlert = new Alert(Alert.AlertType.ERROR);
+            errorAlert.setTitle("Error");
+            errorAlert.setHeaderText("Player addition failed");
+            errorAlert.setContentText("Please enter a valid numeric value for player number.");
+            errorAlert.showAndWait();
+        }  catch (IllegalArgumentException e) {
+            // show error message for empty fields
+            Alert errorAlert = new Alert(Alert.AlertType.ERROR);
+            errorAlert.setTitle("Error");
+            errorAlert.setHeaderText("Player addition failed");
+            errorAlert.setContentText(e.getMessage());
+            errorAlert.showAndWait();
+        }
     }
     
     private void submitGameButtonClicked() {
-        int gameNumber = Integer.parseInt(gameNumberField.getText());
-        String opponent = opponentField.getText();
-        LocalDate gameDate = gameDatePicker.getValue();
-        
-        baseball_stats_db.addGame(gameNumber, opponent, String.valueOf(gameDate));
-        
-//        Game game = new Game(gameNumber, opponent, String.valueOf(gameDate));
-//        
-//        // Add the new player to the list
-//        games.add(game);
+        try {
+            // ensure all fields have a valid value
+            if (gameNumberField.getText().isEmpty() || opponentField.getText().isEmpty() || gameDatePicker.getValue() == null) {
+                throw new IllegalArgumentException("All fields must be filled.");
+            }
+            
+            int gameNumber = Integer.parseInt(gameNumberField.getText());
+            String opponent = opponentField.getText();
+            LocalDate gameDate = gameDatePicker.getValue();
 
-        // Show success message
-        Alert successAlert = new Alert(Alert.AlertType.INFORMATION);
-        successAlert.setTitle("Success");
-        successAlert.setHeaderText("Game added successfully");
-        successAlert.setContentText("Game " + gameNumber + " added with opponent " + opponent + " and date " + gameDate);
-        successAlert.showAndWait();
+            baseball_stats_db.addGame(gameNumber, opponent, String.valueOf(gameDate));
 
-        // Clear fields
-        resetButtonClicked();
+    //        Game game = new Game(gameNumber, opponent, String.valueOf(gameDate));
+    //        
+    //        // Add the new player to the list
+    //        games.add(game);
+
+            // Show success message
+            Alert successAlert = new Alert(Alert.AlertType.INFORMATION);
+            successAlert.setTitle("Success");
+            successAlert.setHeaderText("Game added successfully");
+            successAlert.setContentText("Game " + gameNumber + " added with opponent " + opponent + " and date " + gameDate);
+            successAlert.showAndWait();
+
+            // Clear fields
+            resetButtonClicked();
+        } catch (NumberFormatException e) {
+            // show error message for number format exception
+            Alert errorAlert = new Alert(Alert.AlertType.ERROR);
+            errorAlert.setTitle("Error");
+            errorAlert.setHeaderText("Game addition failed");
+            errorAlert.setContentText("Please enter a valid numeric value for game number.");
+            errorAlert.showAndWait();
+        } catch (IllegalArgumentException e) {
+            // show error message for empty fields
+            Alert errorAlert = new Alert(Alert.AlertType.ERROR);
+            errorAlert.setTitle("Error");
+            errorAlert.setHeaderText("Game addition failed");
+            errorAlert.setContentText(e.getMessage());
+            errorAlert.showAndWait();
+        }
+
         
 //        String gameInfo = ("Game " + gameNumber + " - " + gameDate + " vs " + opponent);
 //        
