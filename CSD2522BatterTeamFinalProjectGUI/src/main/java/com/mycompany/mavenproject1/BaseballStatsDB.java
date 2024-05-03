@@ -6,6 +6,7 @@
 
 Terry Pescosolido - 4/30/24 - added Schedule (Game) interaction for database
 Terry Pescosolido - 4/30/24 - changed getPlayers to order by player name
+Terry Pescosolido - 5/3/24  - added team stats
 */
 
 package com.mycompany.mavenproject1;
@@ -281,6 +282,60 @@ public class BaseballStatsDB {
             }
         }
         return batters_season;
+    }
+        
+    public Team getGameTeamStats(int game_number) {
+        batters = new ArrayList<>(); 
+        batters = getGamePlayerStats(game_number);
+        Team t = new Team();
+        // now loop thru all games requested, accumulating stats for batters   
+        for (Batter b : batters) { 
+            t.setTeamAB(t.getTeamAB() + b.getBatterAB());
+            t.setTeamRuns(t.getTeamRuns() + b.getBatterRuns());
+            t.setTeam1B(t.getTeam1B() + b.getBatter1B());
+            t.setTeam2B(t.getTeam2B() + b.getBatter2B());
+            t.setTeam3B(t.getTeam3B() + b.getBatter3B());
+            t.setTeamHR(t.getTeamHR() + b.getBatterHR());
+            t.setTeamRBI(t.getTeamRBI() + b.getBatterRBI());
+            t.setTeamBB(t.getTeamBB() + b.getBatterBB());
+            t.setTeamHP(t.getTeamHP() + b.getBatterHP());
+            t.setTeamSO(t.getTeamSO() + b.getBatterSO());
+            t.setTeamGDP(t.getTeamGDP() + b.getBatterGDP());
+            t.setTeamSBA(t.getTeamSBA() + b.getBatterSBA());
+            t.setTeamSB(t.getTeamSB() + b.getBatterSB());
+            t.setTeamSF(t.getTeamSF() + b.getBatterSF());
+            t.setTeamSH(t.getTeamSH() + b.getBatterSH());
+            t.setTeamLOB(t.getTeamLOB() + b.getBatterLOB());
+        }
+        return t;
+    }
+    
+    public Team getSeasonTeamStats(int lower_game_number, int higher_game_number) {
+        batters_season = new ArrayList<>(); 
+        batters_season = getSeasonPlayerStats(lower_game_number, higher_game_number);
+        Team t = new Team();
+        // now loop thru all games requested, accumulating stats for batters   
+        for (Batter bs : batters_season) {
+//            System.out.println("bs.getPlayerNumber() = " + bs.getPlayerNumber());
+//            System.out.println("bs.getBatterAB()     = " + bs.getBatterAB());
+            t.setTeamAB(t.getTeamAB() + bs.getBatterAB());
+            t.setTeamRuns(t.getTeamRuns() + bs.getBatterRuns());
+            t.setTeam1B(t.getTeam1B() + bs.getBatter1B());
+            t.setTeam2B(t.getTeam2B() + bs.getBatter2B());
+            t.setTeam3B(t.getTeam3B() + bs.getBatter3B());
+            t.setTeamHR(t.getTeamHR() + bs.getBatterHR());
+            t.setTeamRBI(t.getTeamRBI() + bs.getBatterRBI());
+            t.setTeamBB(t.getTeamBB() + bs.getBatterBB());
+            t.setTeamHP(t.getTeamHP() + bs.getBatterHP());
+            t.setTeamSO(t.getTeamSO() + bs.getBatterSO());
+            t.setTeamGDP(t.getTeamGDP() + bs.getBatterGDP());
+            t.setTeamSBA(t.getTeamSBA() + bs.getBatterSBA());
+            t.setTeamSB(t.getTeamSB() + bs.getBatterSB());
+            t.setTeamSF(t.getTeamSF() + bs.getBatterSF());
+            t.setTeamSH(t.getTeamSH() + bs.getBatterSH());
+            t.setTeamLOB(t.getTeamLOB() + bs.getBatterLOB());
+        }
+        return t;
     }
     
 }
