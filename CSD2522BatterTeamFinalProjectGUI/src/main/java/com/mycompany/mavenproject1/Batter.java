@@ -5,11 +5,10 @@
     Description: This method stores all the info related to a batters.
 
 Terry Pescosolido - 4/30/24 - added methods for multiple game / season stats
+Terry Pescosolido - 5/01/24 - moved formatting fields to FormatStats 
+Terry Pescosolido - 5/03/24 - removed commented out code
 */
-
 package com.mycompany.mavenproject1;
-
-import java.text.NumberFormat;
 
 public class Batter {
 
@@ -245,7 +244,7 @@ public class Batter {
         return batter_lob;
     }
     
-    // stats for a group or set of games
+    // the following are computed / formatted stats
     
     public int getBatterTB() {
         return getBatter1B() + (getBatter2B() * 2) +
@@ -253,59 +252,24 @@ public class Batter {
     } 
     
     public String getBatterGPGSFormatted() {
-        // format as "xxx-xxx"?
-        return getBatterGP() + "-" + getBatterGS();
+        return FormatStats.getGPGSFormatted(getBatterGP(), getBatterGS());
     }
     
     public String getBatterSBSBAFormatted() {
-        // format as "xxx-xxx"
-        return getBatterSB() + "-" + getBatterSBA();
+        return FormatStats.getSBSBAFormatted(getBatterSB(), getBatterSBA());
     }
     
     public String getBatterAVGFormatted() {
-        if (getBatterAB() == 0) {
-            return " ---"; // if no at-bats, cannot compute
-        } else {
-            double avg = (double) getBatterHits() / (double) getBatterAB();  
-            return formatPercentage(avg);
-        }
+        return FormatStats.getAVGFormatted(getBatterAB(), getBatterHits());
     }
     
     public String getBatterSLGFormatted() {
-        // format as ".xxx", can be x.xxx!
-        if (getBatterTB() == 0) {
-            return " ---"; // no slg if no bases (or should this be ".000"
-        } else {
-            double slg = (double) getBatterTB() / (double) getBatterAB();  
-            return formatPercentage(slg);
-        }
+        return FormatStats.getSLGFormatted(getBatterAB(), getBatterTB());
     }
     
     public String getBatterOBFormatted() {
-        // format as ".xxx"
-        // OBP = (Hits + Walks + Hit-By-Pitch) / (At Bats + Walks + Hit By Pitch + Sacrifice Flies)
-        int divisor = getBatterAB() + getBatterBB() + getBatterHP() + getBatterHP();
-        if (divisor == 0) {
-            return " ---"; // no slg if no bases (or should this be ".000"?)
-        } else {
-            double ob = (double) (getBatterHits() + getBatterBB() + getBatterHP()) / (double) divisor;
-            return formatPercentage(ob); // format batterTotalOnBase() 
-        }
+        return FormatStats.getOBFormatted(getBatterAB(), getBatterHits(),
+                               getBatterBB(), getBatterHP(), getBatterSF());
     }
-    
-    public String formatPercentage(double number) {
-        
-        NumberFormat formatter = NumberFormat.getInstance();
-        formatter.setMaximumFractionDigits(3);
-        formatter.setMinimumFractionDigits(3);
-        String formattedNumber = formatter.format((double) Math.round(number * 1000) / 1000); 
-        String[] parsedFormattedNumber = formattedNumber.split("\\.");
-        if (parsedFormattedNumber[0].equals("0")) { // number is lees than 1
-            return "." + parsedFormattedNumber[1]; // don't return "0" whole number
-        } else { // number is more than 0, return whole formatted number
-            return formattedNumber;
-        }
-         
-    }  
     
 }
