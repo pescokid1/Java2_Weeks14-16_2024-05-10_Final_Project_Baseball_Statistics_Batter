@@ -66,6 +66,7 @@ public class App extends Application {
     private Label stolenBaseAttemptLabel = new Label("Stolen Base Attempts:");
     private Label stolenBaseSuccessLabel = new Label("Stolen Base Successes:");
     private Label sacrificeFliesLabel = new Label("Sacrifice Flies:");
+    private Label sacrificeHitsLabel = new Label("Sacrifice Hits:");
     private Label leftOnBaseLabel = new Label("Left on Base:");
     private Label firstNameLabel = new Label("First Name:");
     private Label lastNameLabel = new Label("Last Name:");
@@ -94,6 +95,7 @@ public class App extends Application {
     private TextField stolenBaseAttemptField = new TextField("0");
     private TextField stolenBaseSuccessField = new TextField("0");
     private TextField sacrificeFliesField = new TextField("0");
+    private TextField sacrificeHitsField = new TextField("0");
     private TextField leftOnBaseField = new TextField("0");
     private TextField firstNameField = new TextField();
     private TextField lastNameField = new TextField();
@@ -209,6 +211,7 @@ public class App extends Application {
         labelBox2.getChildren().add(stolenBaseAttemptLabel);
         labelBox2.getChildren().add(stolenBaseSuccessLabel);
         labelBox2.getChildren().add(sacrificeFliesLabel);
+        labelBox2.getChildren().add(sacrificeHitsLabel);
         labelBox2.getChildren().add(leftOnBaseLabel);
         enterDataGrid.add(labelBox2, 2, 0);
         
@@ -234,6 +237,7 @@ public class App extends Application {
         textFieldBox2.getChildren().add(stolenBaseAttemptField);
         textFieldBox2.getChildren().add(stolenBaseSuccessField);
         textFieldBox2.getChildren().add(sacrificeFliesField);
+        textFieldBox2.getChildren().add(sacrificeHitsField);
         textFieldBox2.getChildren().add(leftOnBaseField);
         enterDataGrid.add(textFieldBox2, 3, 0);
 
@@ -358,6 +362,7 @@ public class App extends Application {
                 stolenBaseAttemptField.getText().isEmpty() ||
                 stolenBaseSuccessField.getText().isEmpty() ||
                 sacrificeFliesField.getText().isEmpty() ||
+                sacrificeHitsField.getText().isEmpty() ||
                 leftOnBaseField.getText().isEmpty()) {
                 throw new IllegalArgumentException("All fields must be filled.");
             }
@@ -382,7 +387,7 @@ public class App extends Application {
             int batter_sba = Integer.parseInt(stolenBaseAttemptField.getText());
             int batter_sb = Integer.parseInt(stolenBaseSuccessField.getText());
             int batter_sf = Integer.parseInt(sacrificeFliesField.getText());
-            int batter_sh = Integer.parseInt(sacrificeFliesField.getText());
+            int batter_sh = Integer.parseInt(sacrificeHitsField.getText());
             int batter_lob = Integer.parseInt(leftOnBaseField.getText());
             
             // Insert record into 
@@ -547,6 +552,7 @@ public class App extends Application {
         stolenBaseAttemptField.setText("0");
         stolenBaseSuccessField.setText("0");
         sacrificeFliesField.setText("0");
+        sacrificeHitsField.setText("0");
         leftOnBaseField.setText("0");
         
         // reset data input for enter player menu
