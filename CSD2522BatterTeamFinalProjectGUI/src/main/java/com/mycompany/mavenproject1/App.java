@@ -16,6 +16,7 @@ Terry Pescosolido - 4/29/24 - fixed interaction for new player name combo box wi
 Luke Dawson - 4/30/24 - added a menu option to enter a new game
 Terry Pescosolido - 4/30/24 - fixed interaction for new game combo box with db
 Luke Dawson - 5/3/24 - added error handling to the submit functions
+Terry Pescosolido - 5/3/24 - small change to database call on add player stats
 */
 
 package com.mycompany.mavenproject1;
@@ -396,7 +397,7 @@ public class App extends Application {
                               batter_bo, batter_gs,
                               batter_ab, batter_runs, batter_1b, batter_2b, 
                               batter_3b, batter_hr, batter_bb, batter_hp, batter_rbi,
-                              batter_so, batter_gdp, batter_sb, 
+                              batter_so, batter_gdp, batter_sba, batter_sb, 
                               batter_sf, batter_sh, batter_lob);
 
                 // show success message
