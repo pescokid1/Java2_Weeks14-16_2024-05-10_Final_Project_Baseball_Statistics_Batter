@@ -15,6 +15,8 @@ Luke Dawson - 4/29/24 - added "Add new Batter" menu
 Terry Pescosolido - 4/29/24 - fixed interaction for new player name combo box with db
 Luke Dawson - 4/30/24 - added a menu option to enter a new game
 Terry Pescosolido - 4/30/24 - fixed interaction for new game combo box with db
+Gavin Mefford-Gibbins - 4/30/2024 - Added functionality to the View Game Report button
+Cedrick Charles - 4/30/2024 - Made modification to the display of the View Game Report button added by Gavin
 Luke Dawson - 5/3/24 - added error handling to the submit functions
 Terry Pescosolido - 5/3/24 - small change to database call on add player stats
 */
@@ -149,6 +151,7 @@ public class App extends Application {
         enterDataButton.setOnAction(event -> enterDataButtonClicked());
         enterPlayerButton.setOnAction(event -> enterBatterButtonClicked());
         enterGameButton.setOnAction(event -> enterGameButtonClicked());
+        viewGameReportButton.setOnAction(event -> viewGameReportButtonClicked());
         
         // exit button
         Button exitButton = new Button("Exit");
@@ -341,6 +344,94 @@ public class App extends Application {
         Scene enterGameScene = new Scene(enterGameGrid, 350, 180);
         primaryStage.setScene(enterGameScene);
     }
+    
+    private void viewGameReportButtonClicked() {
+    // Create a new GridPane for layout management
+    GridPane viewGameReportGrid = new GridPane();
+    viewGameReportGrid.setAlignment(Pos.TOP_LEFT); // Set alignment of the grid
+    viewGameReportGrid.setPadding(new Insets(25, 25, 25, 25)); // Set padding around the grid
+    viewGameReportGrid.setHgap(10); // Set horizontal gap between columns
+    viewGameReportGrid.setVgap(10); // Set vertical gap between rows
+
+    // Create a combo box for selecting games
+    ComboBox<String> gameComboBox = new ComboBox<>();
+    // Create an HBox to display player stats side by side
+    VBox statsVBox = new VBox(10);
+    statsVBox.setStyle("-fx-padding: 10;"); // Set padding for HBox
+    statsVBox.setSpacing(5); // Set spacing between child components in HBox
+
+    // Populate the combo box with games from the database
+    for (Game game : baseball_stats_db.getGames()) {
+        gameComboBox.getItems().add("Game " + game.getGameNumber() + " - " + game.getGameDate() + " - " + game.getGameOpponentName());
+    }
+    // Add the combo box to the grid
+    viewGameReportGrid.add(gameComboBox, 1, 1, 1, 1);
+
+    // Set an action when a game is selected from the combo box
+    gameComboBox.setOnAction(e -> {
+        // Extract the game number from the selected item
+        int selectedGameNumber = Integer.parseInt(gameComboBox.getValue().split(" ")[1]);
+        statsVBox.getChildren().clear(); // Clear previous data in HBox
+
+        // Retrieve player stats for the selected game and display them
+        for (Batter batter : baseball_stats_db.getGamePlayerStats(selectedGameNumber)) {
+            HBox playerStatsHBox = new HBox(5); // VBox for displaying each player's stats vertically
+            playerStatsHBox.setStyle("-fx-border-color: black; -fx-padding: 5;"); // Style the VBox
+
+            // Prepare data lines for each player
+            String[] infoLines = {
+                "PN: " + batter.getPlayerName(),
+                "| PNum: " + batter.getPlayerNumber(),
+                "| BONum: " + batter.getBatterOrderNumber(),
+                "| GP: " + batter.getBatterGP(),
+                "| GS: " + batter.getBatterGS(),
+                "| AB: " + batter.getBatterAB(),
+                "| R: " + batter.getBatterRuns(),
+                "| S: " + batter.getBatter1B(),
+                "| D: " + batter.getBatter2B(),
+                "| T: " + batter.getBatter3B(),
+                "| HR: " + batter.getBatterHR(),
+                "| BoB: " + batter.getBatterBB(),
+                "| HbP: " + batter.getBatterHP(),
+                "| RBI: " + batter.getBatterRBI(),
+                "| SO: " + batter.getBatterSO(),
+                "| GiDP: " + batter.getBatterGDP(),
+                "| SBA: " + batter.getBatterSBA(),
+                "| SB: " + batter.getBatterSB(),
+                "| SF: " + batter.getBatterSF(),
+                "| SH: " + batter.getBatterSH(),
+                "| LoB: " + batter.getBatterLOB(),
+                "| TB: " + batter.getBatterTB(),
+                "| GP&GS: " + batter.getBatterGPGSFormatted(),
+                "| SBA: " + batter.getBatterSBSBAFormatted(),
+                "| BA: " + batter.getBatterAVGFormatted(),
+                "| SP: " + batter.getBatterSLGFormatted(),
+                "| OBP: " + batter.getBatterOBFormatted()
+            };
+
+            // Add each stat as a label to the VBox
+            for (String line : infoLines) {
+                Label label = new Label(line);
+                playerStatsHBox.getChildren().add(label);
+            }
+            // Add the VBox to the HBox for horizontal layout
+            statsVBox.getChildren().add(playerStatsHBox);
+        }
+    });
+
+    // Add the HBox to the grid
+    viewGameReportGrid.add(statsVBox, 1, 2);
+
+    // Create a return button to go back to the previous view
+    Button returnButton = new Button("Return");
+    returnButton.setOnAction(event -> returnButtonClicked()); // Set action on button click
+    viewGameReportGrid.add(returnButton, 0, 1); // Add button to the grid
+
+    // Create a scene with the grid and set it to the primary stage
+    Scene enterGameScene = new Scene(viewGameReportGrid, 800, 500);
+    primaryStage.setScene(enterGameScene);
+}
+
     
     // when the user has all data entered, write the data to the database
     private void submitButtonClicked() {
