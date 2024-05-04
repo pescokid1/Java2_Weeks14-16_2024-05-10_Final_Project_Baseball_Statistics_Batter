@@ -19,6 +19,7 @@ Gavin Mefford-Gibbins - 4/30/2024 - Added functionality to the View Game Report 
 Cedrick Charles - 4/30/2024 - Made modification to the display of the View Game Report button added by Gavin
 Luke Dawson - 5/3/24 - added error handling to the submit functions
 Terry Pescosolido - 5/3/24 - small change to database call on add player stats
+Terry Pescosolido - 5/4/24 - small change to reset combo boxes before loading in add player stats
 */
 
 package com.mycompany.mavenproject1;
@@ -183,11 +184,13 @@ public class App extends Application {
         enterDataGrid.setHgap(10);
         enterDataGrid.setVgap(10); 
         
+        gameComboBox.getItems().clear();
         for (Game game : baseball_stats_db.getGames()) {
             gameComboBox.getItems().add("Game " + game.getGameNumber() + " - " + game.getGameDate() + " - " + game.getGameOpponentName()); // Add game names to ComboBox
         }
         enterDataGrid.add(gameComboBox, 1, 1, 1, 1);
         
+        playerComboBox.getItems().clear();
         for (Player player : baseball_stats_db.getPlayers()) {
             playerComboBox.getItems().add(player.getPlayerName() + " #" + player.getPlayerNumber()); // Add player names to ComboBox
         }
