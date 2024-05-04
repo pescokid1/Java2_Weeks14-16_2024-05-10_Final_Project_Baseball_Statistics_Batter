@@ -7,6 +7,7 @@
 Terry Pescosolido - 4/30/24 - added Schedule (Game) interaction for database
 Terry Pescosolido - 4/30/24 - changed getPlayers to order by player name
 Terry Pescosolido - 5/3/24  - added team stats
+Terry Pescosolido - 5/3/24  - fixed adding a player's stats
 */
 
 package com.mycompany.mavenproject1;
@@ -156,8 +157,8 @@ public class BaseballStatsDB {
             int batter_order_number, int batter_gs, 
             int batter_ab, int batter_runs, int batter_1b, int batter_2b, 
             int batter_3b, int batter_hr, int batter_bb, int batter_hp, int batter_rbi,
-            int batter_so, int batter_gdp, int batter_sba, int batter_sb, int batter_sh,
-            int batter_lob) {
+            int batter_so, int batter_gdp, int batter_sba, int batter_sb, 
+            int batter_sf,int batter_sh,int batter_lob) {
         
         openConnection(); 
         String insertPlayerStat =
@@ -165,9 +166,9 @@ public class BaseballStatsDB {
                   "Batter_Order_Number, Batter_GS, " +
                   "Batter_AB, Batter_Runs, Batter_1B, Batter_2B, " +  
                   "Batter_3B, Batter_HR, Batter_BB,  Batter_HP, Batter_RBI, " +
-                  "Batter_SO, Batter_GDP, Batter_SBA, Batter_SB, Batter_SH, " +
-                  "Batter_LOB) " + 
-                  "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+                  "Batter_SO, Batter_GDP, Batter_SBA, Batter_SB, Batter_SF, " +
+                  "Batter_SH, Batter_LOB) " + 
+                  "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
         try (PreparedStatement ps = connection.prepareStatement(insertPlayerStat)) {
             ps.setInt(1, game_number);
             ps.setInt(2, player_number);
@@ -186,8 +187,9 @@ public class BaseballStatsDB {
             ps.setInt(15, batter_gdp);
             ps.setInt(16, batter_sba);
             ps.setInt(17, batter_sb);
-            ps.setInt(18, batter_sh);
-            ps.setInt(19, batter_lob);
+            ps.setInt(18, batter_sf);
+            ps.setInt(19, batter_sh);
+            ps.setInt(20, batter_lob);
             ps.executeUpdate();
         } catch (SQLException e) {
             System.err.println("addGamePlayerStats failed: " + e);
