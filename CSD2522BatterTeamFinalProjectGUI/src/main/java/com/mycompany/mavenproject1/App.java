@@ -20,6 +20,8 @@ Cedrick Charles - 4/30/2024 - Made modification to the display of the View Game 
 Luke Dawson - 5/3/24 - added error handling to the submit functions
 Terry Pescosolido - 5/3/24 - small change to database call on add player stats
 Terry Pescosolido - 5/4/24 - small change to reset combo boxes before loading in add player stats
+Luke Dawson 5/4/24 - fixed resetButtonClicked to work with the enterGame Button and fixed
+    issue regarding manually entering dates into the datePicker field
 */
 
 package com.mycompany.mavenproject1;
@@ -45,6 +47,8 @@ import javafx.scene.control.DatePicker;
 import java.time.LocalDate;
 import java.sql.*;
 import java.util.List;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 
 
 /**
@@ -78,7 +82,7 @@ public class App extends Application {
     private Label activeLabel = new Label("Active");
     private Label gameNumberLabel = new Label("Game #");
     private Label opponentLabel = new Label("Opponent");
-    private Label gameDateLabel = new Label("Game Date:");
+    private Label gameDateLabel = new Label("Game Date (M/D/YYYY)");
     
     // create textfields
     private ComboBox<String> gameComboBox = new ComboBox<>();
@@ -344,7 +348,7 @@ public class App extends Application {
         submitReturnBox.getChildren().add(returnButton);
         enterGameGrid.add(submitReturnBox, 0, 1, 2, 1);
         
-        Scene enterGameScene = new Scene(enterGameGrid, 350, 180);
+        Scene enterGameScene = new Scene(enterGameGrid, 400, 180);
         primaryStage.setScene(enterGameScene);
     }
     
@@ -580,6 +584,14 @@ public class App extends Application {
             int gameNumber = Integer.parseInt(gameNumberField.getText());
             String opponent = opponentField.getText();
             LocalDate gameDate = gameDatePicker.getValue();
+            
+            // if the value is entered manually, parse the date
+            if (gameDatePicker.getValue() != null) {
+                gameDate = gameDatePicker.getValue();
+            } else {
+                String dateString = gameDatePicker.getEditor().getText();
+                gameDate = LocalDate.parse(dateString, DateTimeFormatter.ofPattern("M/d/yyyy"));
+            }
 
             baseball_stats_db.addGame(gameNumber, opponent, String.valueOf(gameDate));
 
@@ -610,6 +622,13 @@ public class App extends Application {
             errorAlert.setTitle("Error");
             errorAlert.setHeaderText("Game addition failed");
             errorAlert.setContentText(e.getMessage());
+            errorAlert.showAndWait();
+        } catch (DateTimeParseException e) {
+            // handle invalid date format
+            Alert errorAlert = new Alert(Alert.AlertType.ERROR);
+            errorAlert.setTitle("Error");
+            errorAlert.setHeaderText("Game addition failed");
+            errorAlert.setContentText("Please enter the date in the format M/D/YYYY.");
             errorAlert.showAndWait();
         }
 
@@ -655,6 +674,11 @@ public class App extends Application {
         lastNameField.setText("");
         enterPlayerNumberField.setText("");
         activeCheckBox.setSelected(false);
+        
+        // reset data input for enter game menu
+        gameNumberField.setText("");
+        opponentField.setText("");
+        gameDatePicker.setValue(null);
     }
     
     // function to end the program
