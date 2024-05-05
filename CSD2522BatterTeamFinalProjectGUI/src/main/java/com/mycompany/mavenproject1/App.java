@@ -24,6 +24,7 @@ Luke Dawson 5/4/24 - fixed resetButtonClicked to work with the enterGame Button 
     issue regarding manually entering dates into the datePicker field
 Terry Pescosolido - 5/5/24 - add crude game report
 Terry Pescosolido - 5/5/24 - tweaks to game report
+Terry Pescosolido - 5/5/24 - tweaks to game report to increase gridpane size and font
 */
 
 package com.mycompany.mavenproject1;
@@ -433,7 +434,7 @@ public class App extends Application {
         HBox playerStatsHBox = new HBox(5); // VBox for displaying each player's stats vertically
         viewGameReportGrid.add(playerStatsHBox, 0, 3, 5, 1);
         playerStatsHBox.setStyle("-fx-border-color: black; -fx-padding: 5;"); // Style the VBox
-        Font font = Font.font("Courier New", FontWeight.BOLD, FontPosture.REGULAR, 11);
+        Font font = Font.font("Courier New", FontWeight.BOLD, FontPosture.REGULAR, 14);
         Label label = new Label();
         
         if (shortReport.isSelected()) { // short report
@@ -589,7 +590,7 @@ public class App extends Application {
     
 
     // Create a scene with the grid and set it to the primary stage
-    Scene enterGameScene = new Scene(viewGameReportGrid, 800, 500);
+    Scene enterGameScene = new Scene(viewGameReportGrid, 1000, 800);
     primaryStage.setScene(enterGameScene);
 }
 
