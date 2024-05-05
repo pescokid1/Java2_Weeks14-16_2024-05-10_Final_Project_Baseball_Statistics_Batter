@@ -23,6 +23,7 @@ Terry Pescosolido - 5/4/24 - small change to reset combo boxes before loading in
 Luke Dawson 5/4/24 - fixed resetButtonClicked to work with the enterGame Button and fixed
     issue regarding manually entering dates into the datePicker field
 Terry Pescosolido - 5/5/24 - add crude game report
+Terry Pescosolido - 5/5/24 - tweaks to game report
 */
 
 package com.mycompany.mavenproject1;
@@ -475,7 +476,7 @@ public class App extends Application {
             }
             Team team = baseball_stats_db.getGameTeamStats(selectedGameNumber);
             String[] totalLine = {
-                    padLeft("Totals", 20), 
+                    padLeft("Totals ", 20), 
                     " " + padLeft(String.valueOf(team.getTeamAB()), 2), 
                     " " + padLeft(String.valueOf(team.getTeamRuns()), 2),
                     " " + padLeft(String.valueOf(team.getTeamHits()), 2),
@@ -495,8 +496,8 @@ public class App extends Application {
             
         } else { // long report
             String infoHead =  
-                    "p#  " + padRight("player", 20) + 
-                    "  avg  ab   r   h  2b  3b  hr rbi  tb   slg%  bb  hp so  gdp   ob%" +
+                    "p#  " + padRight("player", 18) + 
+                    "   avg  ab   r   h  2b  3b  hr rbi  tb   slg%  bb  hp so  gdp    ob%" +
                     "  sf  sh  sb-att lob"; 
 
             label = new Label(infoHead);
@@ -514,8 +515,8 @@ public class App extends Application {
 
                 String[] infoLines = {
                     padLeft(String.valueOf(batter.getPlayerNumber()), 2),  
-                    " " + padRight(batter.getPlayerName(), 20),
-                    " " + batter.getBatterAVGFormatted(),
+                    " " + padRight(batter.getPlayerName(), 18),
+                    " " + padLeft(batter.getBatterAVGFormatted(), 5),
                     " " + padLeft(String.valueOf(batter.getBatterAB()), 2), 
                     " " + padLeft(String.valueOf(batter.getBatterRuns()), 2),
                     " " + padLeft(String.valueOf(batter.getBatterHits()), 2),
@@ -524,15 +525,15 @@ public class App extends Application {
                     " " + padLeft(String.valueOf(batter.getBatterHR()), 2),
                     " " + padLeft(String.valueOf(batter.getBatterRBI()), 3),
                     " " + padLeft(String.valueOf(batter.getBatterTB()), 2),
-                    " " + padLeft(String.valueOf(batter.getBatterSLGFormatted()), 5),
+                    " " + padLeft(batter.getBatterSLGFormatted(), 5),
                     " " + padLeft(String.valueOf(batter.getBatterBB()), 2),
                     " " + padLeft(String.valueOf(batter.getBatterHP()), 2),
                     " " + padLeft(String.valueOf(batter.getBatterSO()), 2),
                     " " + padLeft(String.valueOf(batter.getBatterGDP()), 3),
-                    " " + padLeft(String.valueOf(batter.getBatterOBFormatted()), 4),
+                    " " + padLeft(batter.getBatterOBFormatted(), 5),
                     " " + padLeft(String.valueOf(batter.getBatterSF()), 2),
                     " " + padLeft(String.valueOf(batter.getBatterSH()), 2),
-                    " " + padLeft(String.valueOf(batter.getBatterSBSBAFormatted()), 6),
+                    " " + padLeft(batter.getBatterSBSBAFormatted(), 6),
                     " " + padLeft(String.valueOf(batter.getBatterLOB()), 3)
                 };
 
@@ -548,8 +549,8 @@ public class App extends Application {
             }
             Team team = baseball_stats_db.getGameTeamStats(selectedGameNumber);
             String[] totalLine = {
-                    padLeft("Totals", 24), 
-                    " " + team.getTeamAVGFormatted(),
+                    padLeft("Totals ", 22), 
+                    " " + padLeft(team.getTeamAVGFormatted(), 5),
                     " " + padLeft(String.valueOf(team.getTeamAB()), 2), 
                     " " + padLeft(String.valueOf(team.getTeamRuns()), 2),
                     " " + padLeft(String.valueOf(team.getTeamHits()), 2),
@@ -563,7 +564,7 @@ public class App extends Application {
                     " " + padLeft(String.valueOf(team.getTeamHP()), 2),
                     " " + padLeft(String.valueOf(team.getTeamSO()), 2),
                     " " + padLeft(String.valueOf(team.getTeamGDP()), 3),
-                    " " + team.getTeamOBFormatted(),
+                    " " + padLeft(team.getTeamOBFormatted(), 5),
                     " " + padLeft(String.valueOf(team.getTeamSF()), 2),
                     " " + padLeft(String.valueOf(team.getTeamSH()), 2),
                     " " + padLeft(String.valueOf(team.getTeamSBSBAFormatted()), 6),
