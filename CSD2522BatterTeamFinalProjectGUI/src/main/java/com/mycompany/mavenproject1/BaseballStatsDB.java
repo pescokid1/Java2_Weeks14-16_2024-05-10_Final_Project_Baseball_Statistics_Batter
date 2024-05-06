@@ -9,6 +9,7 @@ Terry Pescosolido - 4/30/24 - changed getPlayers to order by player name
 Terry Pescosolido - 5/3/24  - added team stats
 Terry Pescosolido - 5/3/24  - fixed adding a player's stats
 Luke Dawson - 5/6/24 - added playerStatsExistForGame function
+Terry Pescosolido - 5/6/24  - fixed table name in playerStatsExistForGame
 */
 
 package com.mycompany.mavenproject1;
@@ -346,7 +347,7 @@ public class BaseballStatsDB {
         openConnection();
         // SQL statement to find if the player has data entered for a certain game
         try (PreparedStatement ps = connection.prepareStatement("SELECT COUNT(*) "
-                + "FROM player_stats WHERE game_number = ? AND player_number = ?");) {
+                + "FROM Baseball_Game_Player_Stat WHERE game_number = ? AND player_number = ?");) {
             // set parameters
             ps.setInt(1, gameNumber);
             ps.setInt(2, playerNumber);
