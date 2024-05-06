@@ -730,23 +730,30 @@ public class App extends Application {
             int playerNumber = Integer.parseInt(enterPlayerNumberField.getText());
             //boolean isActive = activeCheckBox.isSelected();
 
-            baseball_stats_db.addPlayer(firstName, lastName, playerNumber);
-    //        // Create a new Player object with the entered data
-    //        Player player = new Player(playerNumber, firstName + " " + lastName, isActive);
-    //
-    //        // Add the new player to the list
-    //        players.add(player);
+            if (playerNumber > 99 || playerNumber < 0) {
+                Alert error = new Alert(Alert.AlertType.ERROR);
+                error.setTitle("Error");
+                error.setHeaderText("Submit failed");
+                error.setContentText("Player number must be between 0 and 99");
+            } else {
+                baseball_stats_db.addPlayer(firstName, lastName, playerNumber);
+        //        // Create a new Player object with the entered data
+        //        Player player = new Player(playerNumber, firstName + " " + lastName, isActive);
+        //
+        //        // Add the new player to the list
+        //        players.add(player);
 
-            // Show success message
-            //String activeStatus = isActive ? "active" : "inactive";
-            Alert successAlert = new Alert(Alert.AlertType.INFORMATION);
-            successAlert.setTitle("Success");
-            successAlert.setHeaderText("Player added successfully");
-            successAlert.setContentText("Player " + firstName + " " + lastName + " added with player number " + playerNumber); // + " and is " + activeStatus);
-            successAlert.showAndWait();
+                // Show success message
+                //String activeStatus = isActive ? "active" : "inactive";
+                Alert successAlert = new Alert(Alert.AlertType.INFORMATION);
+                successAlert.setTitle("Success");
+                successAlert.setHeaderText("Player added successfully");
+                successAlert.setContentText("Player " + firstName + " " + lastName + " added with player number " + playerNumber); // + " and is " + activeStatus);
+                successAlert.showAndWait();
 
-            // Clear fields
-            resetButtonClicked();
+                // Clear fields
+                resetButtonClicked();
+            }
         } catch (NumberFormatException e) {
             // show error message for number format exception
             Alert errorAlert = new Alert(Alert.AlertType.ERROR);
