@@ -25,6 +25,7 @@ Luke Dawson 5/4/24 - fixed resetButtonClicked to work with the enterGame Button 
 Terry Pescosolido - 5/5/24 - add crude game report
 Terry Pescosolido - 5/5/24 - tweaks to game report
 Terry Pescosolido - 5/5/24 - tweaks to game report to increase gridpane size and font
+Luke Dawson - 5/6/24 - added error handling for data integrity
 */
 
 package com.mycompany.mavenproject1;
@@ -363,236 +364,236 @@ public class App extends Application {
     
     private void viewGameReportButtonClicked() {
         
-    // Create a new GridPane for layout management
-    GridPane viewGameReportGrid = new GridPane();
-    viewGameReportGrid.setAlignment(Pos.TOP_LEFT); // Set alignment of the grid
-    viewGameReportGrid.setPadding(new Insets(25, 25, 25, 25)); // Set padding around the grid
-    viewGameReportGrid.setHgap(0); // Set horizontal gap between columns
-    viewGameReportGrid.setVgap(5); // Set vertical gap between rows
-    
-    //Scene scene = new Scene(viewGameReportGrid);
-    
-    VBox topVBox = new VBox(20);
-//    statsVBox.setStyle("-fx-padding: 10;"); // Set padding for HBox
-//    statsVBox.setSpacing(5); // Set spacing between child components in HBox
-    
-    HBox gameReportTopBox = new HBox(20);
-    // Create a combo box for selecting games
-    ComboBox<String> gameComboBox = new ComboBox<>();
-    Label gameComboBoxLabel = new Label("Game: ");
-    // Populate the combo box with games from the database
-    for (Game game : baseball_stats_db.getGames()) {
-        gameComboBox.getItems().add("Game " + game.getGameNumber() + " - " + game.getGameDate() + " - " + game.getGameOpponentName());
+        // Create a new GridPane for layout management
+        GridPane viewGameReportGrid = new GridPane();
+        viewGameReportGrid.setAlignment(Pos.TOP_LEFT); // Set alignment of the grid
+        viewGameReportGrid.setPadding(new Insets(25, 25, 25, 25)); // Set padding around the grid
+        viewGameReportGrid.setHgap(0); // Set horizontal gap between columns
+        viewGameReportGrid.setVgap(5); // Set vertical gap between rows
+
+        //Scene scene = new Scene(viewGameReportGrid);
+
+        VBox topVBox = new VBox(20);
+    //    statsVBox.setStyle("-fx-padding: 10;"); // Set padding for HBox
+    //    statsVBox.setSpacing(5); // Set spacing between child components in HBox
+
+        HBox gameReportTopBox = new HBox(20);
+        // Create a combo box for selecting games
+        ComboBox<String> gameComboBox = new ComboBox<>();
+        Label gameComboBoxLabel = new Label("Game: ");
+        // Populate the combo box with games from the database
+        for (Game game : baseball_stats_db.getGames()) {
+            gameComboBox.getItems().add("Game " + game.getGameNumber() + " - " + game.getGameDate() + " - " + game.getGameOpponentName());
+        }
+        gameReportTopBox.getChildren().add(gameComboBoxLabel);
+        gameReportTopBox.getChildren().add(gameComboBox);
+
+        ToggleGroup shortLongReportToggle = new ToggleGroup();
+        RadioButton shortReport = new RadioButton("Short Report");
+        shortReport.setToggleGroup(shortLongReportToggle);
+        shortReport.setSelected(true);
+        RadioButton longReport = new RadioButton("Detailed Report");
+        longReport.setToggleGroup(shortLongReportToggle);
+        gameReportTopBox.getChildren().add(shortReport);
+        gameReportTopBox.getChildren().add(longReport);  
+
+        topVBox.getChildren().add(gameReportTopBox);
+        viewGameReportGrid.add(topVBox, 0, 0);
+        // Create return and create file buttons
+        HBox bottomHBox = new HBox(5); // VBox for displaying each player's stats vertically
+        Button returnButton = new Button("Return");
+        returnButton.setOnAction(event -> returnButtonClicked()); // Set action on button click
+        bottomHBox.getChildren().add(returnButton);
+        Button createFileButton = new Button("Create File");
+        createFileButton.setOnAction(event -> returnButtonClicked()); // Set action on button click
+        createFileButton.setDisable(true);
+        bottomHBox.getChildren().add(createFileButton); 
+
+        viewGameReportGrid.add(bottomHBox, 0, 2); // Add button to the grid
+
+        VBox statsVBox = new VBox(5);
+        // Set an action when a game is selected from the combo box, or different report type selected
+        shortReport.setOnAction(e -> { 
+            if (!createFileButton.isDisabled()) {
+                gameComboBox.fireEvent(e);
+            }
+        });
+        longReport.setOnAction(e -> { 
+            if (!createFileButton.isDisabled()) {
+                gameComboBox.fireEvent(e);
+            }
+        });
+        gameComboBox.setOnAction(e -> {
+
+            //viewGameReportGrid.getRowConstraints().add(new RowConstraints() {{ setVgrow(Priority.ALWAYS); }});
+            //viewGameReportGrid.setPrefWidth(1000);
+
+            createFileButton.setDisable(false); // activate create file button
+            // Extract the game number from the selected item
+            int selectedGameNumber = Integer.parseInt(gameComboBox.getValue().split(" ")[1]);
+            statsVBox.getChildren().clear(); // Clear previous data in HBox
+            HBox playerStatsHBox = new HBox(5); // VBox for displaying each player's stats vertically
+            viewGameReportGrid.add(playerStatsHBox, 0, 3, 5, 1);
+            playerStatsHBox.setStyle("-fx-border-color: black; -fx-padding: 5;"); // Style the VBox
+            Font font = Font.font("Courier New", FontWeight.BOLD, FontPosture.REGULAR, 14);
+            Label label = new Label();
+
+            if (shortReport.isSelected()) { // short report
+                String infoHead =  
+                        padRight("player", 20) +  "  ab   r  h  rbi  bb  so lob";
+
+                label = new Label(infoHead);
+                label.setFont(font); 
+
+                playerStatsHBox.getChildren().add(label);
+                statsVBox.getChildren().add(playerStatsHBox);
+                viewGameReportGrid.setPrefWidth(playerStatsHBox.getWidth() + 500);
+
+                // Retrieve player stats for the selected game and display them
+                for (Batter batter : baseball_stats_db.getGamePlayerStats(selectedGameNumber)) {
+
+        //            HBox playerStatsHBox = new HBox(5); // VBox for displaying each player's stats vertically
+                    playerStatsHBox = new HBox(5); // VBox for displaying each player's stats vertically
+                    playerStatsHBox.setStyle("-fx-border-color: black; -fx-padding: 5;"); // Style the VBox
+
+                    String[] infoLines = {
+                              padRight(batter.getPlayerName(), 20),
+                        " " + padLeft(String.valueOf(batter.getBatterAB()), 2), 
+                        " " + padLeft(String.valueOf(batter.getBatterRuns()), 2),
+                        " " + padLeft(String.valueOf(batter.getBatterHits()), 2),
+                        " " + padLeft(String.valueOf(batter.getBatterRBI()), 3),
+                        " " + padLeft(String.valueOf(batter.getBatterBB()), 2),
+                        " " + padLeft(String.valueOf(batter.getBatterSO()), 2),
+                        " " + padLeft(String.valueOf(batter.getBatterLOB()), 2)
+                    };
+
+                    // Add each stat as a label to the VBox
+                    for (String line : infoLines) {
+                        label = new Label(line);
+                        label.setFont(font);        
+                        playerStatsHBox.getChildren().add(label);
+                    }
+                    // Add the VBox to the HBox for horizontal layout
+                    statsVBox.getChildren().add(playerStatsHBox);
+                }
+                Team team = baseball_stats_db.getGameTeamStats(selectedGameNumber);
+                String[] totalLine = {
+                        padLeft("Totals ", 20), 
+                        " " + padLeft(String.valueOf(team.getTeamAB()), 2), 
+                        " " + padLeft(String.valueOf(team.getTeamRuns()), 2),
+                        " " + padLeft(String.valueOf(team.getTeamHits()), 2),
+                        " " + padLeft(String.valueOf(team.getTeamRBI()), 3),
+                        " " + padLeft(String.valueOf(team.getTeamBB()), 2),
+                        " " + padLeft(String.valueOf(team.getTeamSO()), 2),
+                        " " + padLeft(String.valueOf(team.getTeamLOB()), 2)
+                };
+                playerStatsHBox = new HBox(5); // VBox for displaying each player's stats vertically
+                playerStatsHBox.setStyle("-fx-border-color: black; -fx-padding: 5;"); // Style the VBox
+                for (String line : totalLine) {
+                    label = new Label(line);
+                    label.setFont(font);        
+                    playerStatsHBox.getChildren().add(label);
+                }
+                statsVBox.getChildren().add(playerStatsHBox);
+
+            } else { // long report
+                String infoHead =  
+                        "p#  " + padRight("player", 18) + 
+                        "   avg  ab   r   h  2b  3b  hr rbi  tb   slg%  bb  hp so  gdp    ob%" +
+                        "  sf  sh  sb-att lob"; 
+
+                label = new Label(infoHead);
+                label.setFont(font);        
+                playerStatsHBox.getChildren().add(label);
+                statsVBox.getChildren().add(playerStatsHBox);
+                viewGameReportGrid.setPrefWidth(playerStatsHBox.getWidth() + 500);
+
+                // Retrieve player stats for the selected game and display them
+                for (Batter batter : baseball_stats_db.getGamePlayerStats(selectedGameNumber)) {
+
+        //            HBox playerStatsHBox = new HBox(5); // VBox for displaying each player's stats vertically
+                    playerStatsHBox = new HBox(5); // VBox for displaying each player's stats vertically
+                    playerStatsHBox.setStyle("-fx-border-color: black; -fx-padding: 5;"); // Style the VBox
+
+                    String[] infoLines = {
+                        padLeft(String.valueOf(batter.getPlayerNumber()), 2),  
+                        " " + padRight(batter.getPlayerName(), 18),
+                        " " + padLeft(batter.getBatterAVGFormatted(), 5),
+                        " " + padLeft(String.valueOf(batter.getBatterAB()), 2), 
+                        " " + padLeft(String.valueOf(batter.getBatterRuns()), 2),
+                        " " + padLeft(String.valueOf(batter.getBatterHits()), 2),
+                        " " + padLeft(String.valueOf(batter.getBatter2B()), 2),
+                        " " + padLeft(String.valueOf(batter.getBatter3B()), 2),
+                        " " + padLeft(String.valueOf(batter.getBatterHR()), 2),
+                        " " + padLeft(String.valueOf(batter.getBatterRBI()), 3),
+                        " " + padLeft(String.valueOf(batter.getBatterTB()), 2),
+                        " " + padLeft(batter.getBatterSLGFormatted(), 5),
+                        " " + padLeft(String.valueOf(batter.getBatterBB()), 2),
+                        " " + padLeft(String.valueOf(batter.getBatterHP()), 2),
+                        " " + padLeft(String.valueOf(batter.getBatterSO()), 2),
+                        " " + padLeft(String.valueOf(batter.getBatterGDP()), 3),
+                        " " + padLeft(batter.getBatterOBFormatted(), 5),
+                        " " + padLeft(String.valueOf(batter.getBatterSF()), 2),
+                        " " + padLeft(String.valueOf(batter.getBatterSH()), 2),
+                        " " + padLeft(batter.getBatterSBSBAFormatted(), 6),
+                        " " + padLeft(String.valueOf(batter.getBatterLOB()), 3)
+                    };
+
+                    // Add each stat as a label to the VBox
+                    for (String line : infoLines) {
+                        label = new Label(line);
+                        label.setFont(font);        
+                        playerStatsHBox.getChildren().add(label);
+        //                title.setStyle("-fx-font-family: 'Roboto Regular';" + "-fx-font-size: 2.3em;" + "-fx-opacity: 0.87;");
+                    }
+                    // Add the VBox to the HBox for horizontal layout
+                    statsVBox.getChildren().add(playerStatsHBox);
+                }
+                Team team = baseball_stats_db.getGameTeamStats(selectedGameNumber);
+                String[] totalLine = {
+                        padLeft("Totals ", 22), 
+                        " " + padLeft(team.getTeamAVGFormatted(), 5),
+                        " " + padLeft(String.valueOf(team.getTeamAB()), 2), 
+                        " " + padLeft(String.valueOf(team.getTeamRuns()), 2),
+                        " " + padLeft(String.valueOf(team.getTeamHits()), 2),
+                        " " + padLeft(String.valueOf(team.getTeam2B()), 2),
+                        " " + padLeft(String.valueOf(team.getTeam3B()), 2),
+                        " " + padLeft(String.valueOf(team.getTeamHR()), 2),
+                        " " + padLeft(String.valueOf(team.getTeamRBI()), 3),
+                        " " + padLeft(String.valueOf(team.getTeamTB()), 2),
+                        " " + padLeft(team.getTeamSLGFormatted(), 5),
+                        " " + padLeft(String.valueOf(team.getTeamBB()), 2),
+                        " " + padLeft(String.valueOf(team.getTeamHP()), 2),
+                        " " + padLeft(String.valueOf(team.getTeamSO()), 2),
+                        " " + padLeft(String.valueOf(team.getTeamGDP()), 3),
+                        " " + padLeft(team.getTeamOBFormatted(), 5),
+                        " " + padLeft(String.valueOf(team.getTeamSF()), 2),
+                        " " + padLeft(String.valueOf(team.getTeamSH()), 2),
+                        " " + padLeft(String.valueOf(team.getTeamSBSBAFormatted()), 6),
+                        " " + padLeft(String.valueOf(team.getTeamLOB()), 3)
+                };
+                playerStatsHBox = new HBox(5); // VBox for displaying each player's stats vertically
+                playerStatsHBox.setStyle("-fx-border-color: black; -fx-padding: 5;"); // Style the VBox
+                for (String line : totalLine) {
+                    label = new Label(line);
+                    label.setFont(font);        
+                    playerStatsHBox.getChildren().add(label);
+                }
+                statsVBox.getChildren().add(playerStatsHBox);
+            }
+
+        });
+
+        // Add the HBox to the grid
+        viewGameReportGrid.add(statsVBox, 0, 3);
+
+
+
+
+        // Create a scene with the grid and set it to the primary stage
+        Scene enterGameScene = new Scene(viewGameReportGrid, 1000, 800);
+        primaryStage.setScene(enterGameScene);
     }
-    gameReportTopBox.getChildren().add(gameComboBoxLabel);
-    gameReportTopBox.getChildren().add(gameComboBox);
-    
-    ToggleGroup shortLongReportToggle = new ToggleGroup();
-    RadioButton shortReport = new RadioButton("Short Report");
-    shortReport.setToggleGroup(shortLongReportToggle);
-    shortReport.setSelected(true);
-    RadioButton longReport = new RadioButton("Detailed Report");
-    longReport.setToggleGroup(shortLongReportToggle);
-    gameReportTopBox.getChildren().add(shortReport);
-    gameReportTopBox.getChildren().add(longReport);  
-    
-    topVBox.getChildren().add(gameReportTopBox);
-    viewGameReportGrid.add(topVBox, 0, 0);
-    // Create return and create file buttons
-    HBox bottomHBox = new HBox(5); // VBox for displaying each player's stats vertically
-    Button returnButton = new Button("Return");
-    returnButton.setOnAction(event -> returnButtonClicked()); // Set action on button click
-    bottomHBox.getChildren().add(returnButton);
-    Button createFileButton = new Button("Create File");
-    createFileButton.setOnAction(event -> returnButtonClicked()); // Set action on button click
-    createFileButton.setDisable(true);
-    bottomHBox.getChildren().add(createFileButton); 
-
-    viewGameReportGrid.add(bottomHBox, 0, 2); // Add button to the grid
-   
-    VBox statsVBox = new VBox(5);
-    // Set an action when a game is selected from the combo box, or different report type selected
-    shortReport.setOnAction(e -> { 
-        if (!createFileButton.isDisabled()) {
-            gameComboBox.fireEvent(e);
-        }
-    });
-    longReport.setOnAction(e -> { 
-        if (!createFileButton.isDisabled()) {
-            gameComboBox.fireEvent(e);
-        }
-    });
-    gameComboBox.setOnAction(e -> {
-
-        //viewGameReportGrid.getRowConstraints().add(new RowConstraints() {{ setVgrow(Priority.ALWAYS); }});
-        //viewGameReportGrid.setPrefWidth(1000);
-        
-        createFileButton.setDisable(false); // activate create file button
-        // Extract the game number from the selected item
-        int selectedGameNumber = Integer.parseInt(gameComboBox.getValue().split(" ")[1]);
-        statsVBox.getChildren().clear(); // Clear previous data in HBox
-        HBox playerStatsHBox = new HBox(5); // VBox for displaying each player's stats vertically
-        viewGameReportGrid.add(playerStatsHBox, 0, 3, 5, 1);
-        playerStatsHBox.setStyle("-fx-border-color: black; -fx-padding: 5;"); // Style the VBox
-        Font font = Font.font("Courier New", FontWeight.BOLD, FontPosture.REGULAR, 14);
-        Label label = new Label();
-        
-        if (shortReport.isSelected()) { // short report
-            String infoHead =  
-                    padRight("player", 20) +  "  ab   r  h  rbi  bb  so lob";
-            
-            label = new Label(infoHead);
-            label.setFont(font); 
-            
-            playerStatsHBox.getChildren().add(label);
-            statsVBox.getChildren().add(playerStatsHBox);
-            viewGameReportGrid.setPrefWidth(playerStatsHBox.getWidth() + 500);
-
-            // Retrieve player stats for the selected game and display them
-            for (Batter batter : baseball_stats_db.getGamePlayerStats(selectedGameNumber)) {
-
-    //            HBox playerStatsHBox = new HBox(5); // VBox for displaying each player's stats vertically
-                playerStatsHBox = new HBox(5); // VBox for displaying each player's stats vertically
-                playerStatsHBox.setStyle("-fx-border-color: black; -fx-padding: 5;"); // Style the VBox
-
-                String[] infoLines = {
-                          padRight(batter.getPlayerName(), 20),
-                    " " + padLeft(String.valueOf(batter.getBatterAB()), 2), 
-                    " " + padLeft(String.valueOf(batter.getBatterRuns()), 2),
-                    " " + padLeft(String.valueOf(batter.getBatterHits()), 2),
-                    " " + padLeft(String.valueOf(batter.getBatterRBI()), 3),
-                    " " + padLeft(String.valueOf(batter.getBatterBB()), 2),
-                    " " + padLeft(String.valueOf(batter.getBatterSO()), 2),
-                    " " + padLeft(String.valueOf(batter.getBatterLOB()), 2)
-                };
-
-                // Add each stat as a label to the VBox
-                for (String line : infoLines) {
-                    label = new Label(line);
-                    label.setFont(font);        
-                    playerStatsHBox.getChildren().add(label);
-                }
-                // Add the VBox to the HBox for horizontal layout
-                statsVBox.getChildren().add(playerStatsHBox);
-            }
-            Team team = baseball_stats_db.getGameTeamStats(selectedGameNumber);
-            String[] totalLine = {
-                    padLeft("Totals ", 20), 
-                    " " + padLeft(String.valueOf(team.getTeamAB()), 2), 
-                    " " + padLeft(String.valueOf(team.getTeamRuns()), 2),
-                    " " + padLeft(String.valueOf(team.getTeamHits()), 2),
-                    " " + padLeft(String.valueOf(team.getTeamRBI()), 3),
-                    " " + padLeft(String.valueOf(team.getTeamBB()), 2),
-                    " " + padLeft(String.valueOf(team.getTeamSO()), 2),
-                    " " + padLeft(String.valueOf(team.getTeamLOB()), 2)
-            };
-            playerStatsHBox = new HBox(5); // VBox for displaying each player's stats vertically
-            playerStatsHBox.setStyle("-fx-border-color: black; -fx-padding: 5;"); // Style the VBox
-            for (String line : totalLine) {
-                label = new Label(line);
-                label.setFont(font);        
-                playerStatsHBox.getChildren().add(label);
-            }
-            statsVBox.getChildren().add(playerStatsHBox);
-            
-        } else { // long report
-            String infoHead =  
-                    "p#  " + padRight("player", 18) + 
-                    "   avg  ab   r   h  2b  3b  hr rbi  tb   slg%  bb  hp so  gdp    ob%" +
-                    "  sf  sh  sb-att lob"; 
-
-            label = new Label(infoHead);
-            label.setFont(font);        
-            playerStatsHBox.getChildren().add(label);
-            statsVBox.getChildren().add(playerStatsHBox);
-            viewGameReportGrid.setPrefWidth(playerStatsHBox.getWidth() + 500);
-
-            // Retrieve player stats for the selected game and display them
-            for (Batter batter : baseball_stats_db.getGamePlayerStats(selectedGameNumber)) {
-
-    //            HBox playerStatsHBox = new HBox(5); // VBox for displaying each player's stats vertically
-                playerStatsHBox = new HBox(5); // VBox for displaying each player's stats vertically
-                playerStatsHBox.setStyle("-fx-border-color: black; -fx-padding: 5;"); // Style the VBox
-
-                String[] infoLines = {
-                    padLeft(String.valueOf(batter.getPlayerNumber()), 2),  
-                    " " + padRight(batter.getPlayerName(), 18),
-                    " " + padLeft(batter.getBatterAVGFormatted(), 5),
-                    " " + padLeft(String.valueOf(batter.getBatterAB()), 2), 
-                    " " + padLeft(String.valueOf(batter.getBatterRuns()), 2),
-                    " " + padLeft(String.valueOf(batter.getBatterHits()), 2),
-                    " " + padLeft(String.valueOf(batter.getBatter2B()), 2),
-                    " " + padLeft(String.valueOf(batter.getBatter3B()), 2),
-                    " " + padLeft(String.valueOf(batter.getBatterHR()), 2),
-                    " " + padLeft(String.valueOf(batter.getBatterRBI()), 3),
-                    " " + padLeft(String.valueOf(batter.getBatterTB()), 2),
-                    " " + padLeft(batter.getBatterSLGFormatted(), 5),
-                    " " + padLeft(String.valueOf(batter.getBatterBB()), 2),
-                    " " + padLeft(String.valueOf(batter.getBatterHP()), 2),
-                    " " + padLeft(String.valueOf(batter.getBatterSO()), 2),
-                    " " + padLeft(String.valueOf(batter.getBatterGDP()), 3),
-                    " " + padLeft(batter.getBatterOBFormatted(), 5),
-                    " " + padLeft(String.valueOf(batter.getBatterSF()), 2),
-                    " " + padLeft(String.valueOf(batter.getBatterSH()), 2),
-                    " " + padLeft(batter.getBatterSBSBAFormatted(), 6),
-                    " " + padLeft(String.valueOf(batter.getBatterLOB()), 3)
-                };
-
-                // Add each stat as a label to the VBox
-                for (String line : infoLines) {
-                    label = new Label(line);
-                    label.setFont(font);        
-                    playerStatsHBox.getChildren().add(label);
-    //                title.setStyle("-fx-font-family: 'Roboto Regular';" + "-fx-font-size: 2.3em;" + "-fx-opacity: 0.87;");
-                }
-                // Add the VBox to the HBox for horizontal layout
-                statsVBox.getChildren().add(playerStatsHBox);
-            }
-            Team team = baseball_stats_db.getGameTeamStats(selectedGameNumber);
-            String[] totalLine = {
-                    padLeft("Totals ", 22), 
-                    " " + padLeft(team.getTeamAVGFormatted(), 5),
-                    " " + padLeft(String.valueOf(team.getTeamAB()), 2), 
-                    " " + padLeft(String.valueOf(team.getTeamRuns()), 2),
-                    " " + padLeft(String.valueOf(team.getTeamHits()), 2),
-                    " " + padLeft(String.valueOf(team.getTeam2B()), 2),
-                    " " + padLeft(String.valueOf(team.getTeam3B()), 2),
-                    " " + padLeft(String.valueOf(team.getTeamHR()), 2),
-                    " " + padLeft(String.valueOf(team.getTeamRBI()), 3),
-                    " " + padLeft(String.valueOf(team.getTeamTB()), 2),
-                    " " + padLeft(team.getTeamSLGFormatted(), 5),
-                    " " + padLeft(String.valueOf(team.getTeamBB()), 2),
-                    " " + padLeft(String.valueOf(team.getTeamHP()), 2),
-                    " " + padLeft(String.valueOf(team.getTeamSO()), 2),
-                    " " + padLeft(String.valueOf(team.getTeamGDP()), 3),
-                    " " + padLeft(team.getTeamOBFormatted(), 5),
-                    " " + padLeft(String.valueOf(team.getTeamSF()), 2),
-                    " " + padLeft(String.valueOf(team.getTeamSH()), 2),
-                    " " + padLeft(String.valueOf(team.getTeamSBSBAFormatted()), 6),
-                    " " + padLeft(String.valueOf(team.getTeamLOB()), 3)
-            };
-            playerStatsHBox = new HBox(5); // VBox for displaying each player's stats vertically
-            playerStatsHBox.setStyle("-fx-border-color: black; -fx-padding: 5;"); // Style the VBox
-            for (String line : totalLine) {
-                label = new Label(line);
-                label.setFont(font);        
-                playerStatsHBox.getChildren().add(label);
-            }
-            statsVBox.getChildren().add(playerStatsHBox);
-        }
-                    
-    });
-    
-    // Add the HBox to the grid
-    viewGameReportGrid.add(statsVBox, 0, 3);
-
-    
-    
-
-    // Create a scene with the grid and set it to the primary stage
-    Scene enterGameScene = new Scene(viewGameReportGrid, 1000, 800);
-    primaryStage.setScene(enterGameScene);
-}
 
     
     // when the user has all data entered, write the data to the database
@@ -643,6 +644,40 @@ public class App extends Application {
             int batter_sf = Integer.parseInt(sacrificeFliesField.getText());
             int batter_sh = Integer.parseInt(sacrificeHitsField.getText());
             int batter_lob = Integer.parseInt(leftOnBaseField.getText());
+            
+            // ensure the data entered is within proper ranges and follows logical guidelines
+            String errorMsg = "";
+            if (baseball_stats_db.playerStatsExistForGame(game_number, batter_pn)) {
+                errorMsg += "Player stats already exist for the selected game.\n";
+            }
+            if (batter_ab < (batter_1b + batter_2b + batter_3b + batter_bb + batter_hp + batter_so + batter_gdp + batter_sf + batter_sh)) {
+                errorMsg += "The At-Bats field cannot be less than the sum of the players total hits, base-on-balls, "
+                        + "hits-by-pitch, strikeouts, ground-out-dps, sacrifice flies, and sacrifice hits combined.\n";
+            }
+            if (batter_ab < (batter_runs + batter_lob)) {
+                errorMsg += "The At-Bats field cannot be less than the sum of the players runs and left-on-bases.\n";
+            }
+            if (batter_rbi > ((4 * batter_hr) + ((batter_1b + batter_2b + batter_3b)*3) + (batter_bb + batter_hp + batter_sf + batter_sh))) {
+                errorMsg += "The RBI's are inconsistent with the number and types of hits, base-on-balls, hits-by-pitch, "
+                        + "sacrifice flies, and sacrifice hits.\n";
+            }
+            if (batter_sb > batter_sba) {
+                errorMsg += "Stolen base successes cannot be higher than stolen base attempts.\n";
+            }
+            if (0 > batter_ab || batter_ab > 20) {
+                errorMsg += "The number entered in the At-Bats field must be between 0 and 20.\n";
+            }
+            if (batter_bo < 1 || batter_bo > 9) {
+                errorMsg += "Batting Order must be a number from 1 to 9.\n";
+            }
+            
+            // if an error is found, print the error message
+            if (errorMsg.length() > 0) {
+                Alert alert = new Alert(Alert.AlertType.ERROR);
+                alert.setHeaderText("Error");
+                alert.setContentText(errorMsg);
+                alert.showAndWait();
+            }
             
             // Insert record into 
             //try (
