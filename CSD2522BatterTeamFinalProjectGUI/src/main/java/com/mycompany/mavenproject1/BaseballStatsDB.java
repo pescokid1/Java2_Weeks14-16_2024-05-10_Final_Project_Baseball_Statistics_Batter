@@ -8,12 +8,14 @@ Terry Pescosolido - 4/30/24 - added Schedule (Game) interaction for database
 Terry Pescosolido - 4/30/24 - changed getPlayers to order by player name
 Terry Pescosolido - 5/3/24  - added team stats
 Terry Pescosolido - 5/3/24  - fixed adding a player's stats
+Luke Dawson - 5/6/24 - added playerStatsExistForGame function
 */
 
 package com.mycompany.mavenproject1;
 
 import java.util.*;
 import java.sql.*;
+import javafx.scene.control.Alert;
 
 public class BaseballStatsDB {
 
@@ -338,6 +340,40 @@ public class BaseballStatsDB {
             t.setTeamLOB(t.getTeamLOB() + bs.getBatterLOB());
         }
         return t;
+    }
+    
+    public boolean playerStatsExistForGame(int gameNumber, int playerNumber) {
+        openConnection();
+        // SQL statement to find if the player has data entered for a certain game
+        try (PreparedStatement ps = connection.prepareStatement("SELECT COUNT(*) "
+                + "FROM player_stats WHERE game_number = ? AND player_number = ?");) {
+            // set parameters
+            ps.setInt(1, gameNumber);
+            ps.setInt(2, playerNumber);
+
+            // execute query
+            ResultSet rs = ps.executeQuery();
+
+            // check if any rows are returned
+            if (rs.next()) {
+                int count = rs.getInt(1);
+                // if count is greater than 0, player stats exist for the selected game
+                return count > 0;
+            }
+        } catch (SQLException e) {
+            // show error message
+            Alert errorAlert = new Alert(Alert.AlertType.ERROR);
+            errorAlert.setTitle("Error");
+            errorAlert.setHeaderText("Database Error");
+            errorAlert.setContentText("An error occurred while accessing the database. Please try again later.");
+            errorAlert.showAndWait();
+        } finally {
+            // close the connection
+            closeConnection();
+        }
+
+        // return false by default (player has no stats for given game)
+        return false;
     }
     
 }
