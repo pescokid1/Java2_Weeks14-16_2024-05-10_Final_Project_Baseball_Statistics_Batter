@@ -677,17 +677,15 @@ public class App extends Application {
                 alert.setHeaderText("Error");
                 alert.setContentText(errorMsg);
                 alert.showAndWait();
-            }
-            
-            // Insert record into 
-            //try (
+            } else {
+                // Insert record into 
                 baseball_stats_db.addGamePlayerStats(game_number, batter_pn, 
                               batter_bo, batter_gs,
                               batter_ab, batter_runs, batter_1b, batter_2b, 
                               batter_3b, batter_hr, batter_bb, batter_hp, batter_rbi,
                               batter_so, batter_gdp, batter_sba, batter_sb, 
                               batter_sf, batter_sh, batter_lob);
-
+                
                 // show success message
                 Alert successAlert = new Alert(Alert.AlertType.INFORMATION);
                 successAlert.setTitle("Success");
@@ -697,6 +695,8 @@ public class App extends Application {
 
                 // clear fields
                 resetButtonClicked();
+            }
+            
         } catch (NumberFormatException e) {
             // show error message
             Alert errorAlert = new Alert(Alert.AlertType.ERROR);
