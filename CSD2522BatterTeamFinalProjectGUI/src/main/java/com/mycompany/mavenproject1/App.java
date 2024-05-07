@@ -26,6 +26,7 @@ Terry Pescosolido - 5/5/24 - add crude game report
 Terry Pescosolido - 5/5/24 - tweaks to game report
 Terry Pescosolido - 5/5/24 - tweaks to game report to increase gridpane size and font
 Luke Dawson - 5/6/24 - added error handling for data integrity
+Terry Pescosolido - 5/6/24 - enahnced error-checking in submitButtonClicked
 */
 
 package com.mycompany.mavenproject1;
@@ -598,119 +599,173 @@ public class App extends Application {
     
     // when the user has all data entered, write the data to the database
     private void submitButtonClicked() {
-        try {
-            // ensure all fields have a valid value
-            if (gameComboBox.getSelectionModel().isEmpty() ||
-                playerComboBox.getSelectionModel().isEmpty() ||
-                battingOrderField.getText().isEmpty() ||
-                atBatField.getText().isEmpty() ||
-                runField.getText().isEmpty() ||
-                singleField.getText().isEmpty() ||
-                doubleField.getText().isEmpty() ||
-                tripleField.getText().isEmpty() ||
-                homeRunField.getText().isEmpty() ||
-                basesOnBallField.getText().isEmpty() ||
-                hitsByPitchField.getText().isEmpty() ||
-                runsBattedInField.getText().isEmpty() ||
-                strikeOutField.getText().isEmpty() ||
-                groundedDoublePlayField.getText().isEmpty() ||
-                stolenBaseAttemptField.getText().isEmpty() ||
-                stolenBaseSuccessField.getText().isEmpty() ||
-                sacrificeFliesField.getText().isEmpty() ||
-                sacrificeHitsField.getText().isEmpty() ||
-                leftOnBaseField.getText().isEmpty()) {
-                throw new IllegalArgumentException("All fields must be filled.");
+        
+        String errorMsg = "";
+        String notIntMsg = " is missing or not an integer\n";
+        
+        Alert alert = new Alert(Alert.AlertType.ERROR);
+        alert.setHeaderText("Error");
+        
+        if (gameComboBox.getItems().isEmpty()) {
+            errorMsg += "There are no games to select from. Go back to main menu and add at least one.\n";
+        } else {
+            if (gameComboBox.getSelectionModel().isEmpty()) {
+                errorMsg += "No game selection made.\n";
             }
-            // Retrieve the data entered in each field
-            String gameInfo = gameComboBox.getSelectionModel().getSelectedItem();
-            int game_number = Integer.parseInt(gameInfo.split(" ")[1]);
-            String playerNameNumber = playerComboBox.getSelectionModel().getSelectedItem();
-            int batter_pn = Integer.parseInt(playerNameNumber.split("#")[1]);
-            int batter_gs = starterCheckBox.isSelected() ? 1 : 0; // convert boolean to int
-            int batter_bo = Integer.parseInt(battingOrderField.getText());
-            int batter_ab = Integer.parseInt(atBatField.getText());
-            int batter_runs = Integer.parseInt(runField.getText());
-            int batter_1b = Integer.parseInt(singleField.getText());
-            int batter_2b = Integer.parseInt(doubleField.getText()); 
-            int batter_3b = Integer.parseInt(tripleField.getText());
-            int batter_hr = Integer.parseInt(homeRunField.getText());
-            int batter_bb = Integer.parseInt(basesOnBallField.getText());
-            int batter_hp = Integer.parseInt(hitsByPitchField.getText());
-            int batter_rbi = Integer.parseInt(runsBattedInField.getText());
-            int batter_so = Integer.parseInt(strikeOutField.getText());
-            int batter_gdp = Integer.parseInt(groundedDoublePlayField.getText());
-            int batter_sba = Integer.parseInt(stolenBaseAttemptField.getText());
-            int batter_sb = Integer.parseInt(stolenBaseSuccessField.getText());
-            int batter_sf = Integer.parseInt(sacrificeFliesField.getText());
-            int batter_sh = Integer.parseInt(sacrificeHitsField.getText());
-            int batter_lob = Integer.parseInt(leftOnBaseField.getText());
-            
-            // ensure the data entered is within proper ranges and follows logical guidelines
-            String errorMsg = "";
-            if (baseball_stats_db.playerStatsExistForGame(game_number, batter_pn)) {
-                errorMsg += "Player stats already exist for the selected game.\n";
+        }
+        if (playerComboBox.getItems().isEmpty()) {
+            errorMsg += "There are no players to select from. Go back to main menu and add at least one.\n";
+        } else {
+            if (playerComboBox.getSelectionModel().isEmpty()) {
+                errorMsg += "No player selection made.\n";
             }
-            if (batter_ab < (batter_1b + batter_2b + batter_3b + batter_bb + batter_hp + batter_so + batter_gdp + batter_sf + batter_sh)) {
-                errorMsg += "The At-Bats field cannot be less than the sum of the players total hits, base-on-balls, "
-                        + "hits-by-pitch, strikeouts, ground-out-dps, sacrifice flies, and sacrifice hits combined.\n";
+        }
+        
+        if (errorMsg.length() > 0) { // must have game and player to move on         
+            alert.setContentText(errorMsg);
+            alert.showAndWait();           
+        } else { // game and player selection good, now check if number fields filled in
+        
+            if (!IntCheck.isInteger(battingOrderField.getText())) {
+               errorMsg += "Batting Order #" + notIntMsg;
             }
-            if (batter_ab < (batter_runs + batter_lob)) {
-                errorMsg += "The At-Bats field cannot be less than the sum of the players runs and left-on-bases.\n";
+            if (!IntCheck.isInteger(atBatField.getText())) {
+               errorMsg += "At-Bats" + notIntMsg;
             }
-            if (batter_rbi > ((4 * batter_hr) + ((batter_1b + batter_2b + batter_3b)*3) + (batter_bb + batter_hp + batter_sf + batter_sh))) {
-                errorMsg += "The RBI's are inconsistent with the number and types of hits, base-on-balls, hits-by-pitch, "
-                        + "sacrifice flies, and sacrifice hits.\n";
+            if (!IntCheck.isInteger(runField.getText())) {
+               errorMsg += "Runs" + notIntMsg;
             }
-            if (batter_sb > batter_sba) {
-                errorMsg += "Stolen base successes cannot be higher than stolen base attempts.\n";
+            if (!IntCheck.isInteger(singleField.getText())) {
+               errorMsg += "Singles" + notIntMsg;
             }
-            if (0 > batter_ab || batter_ab > 20) {
-                errorMsg += "The number entered in the At-Bats field must be between 0 and 20.\n";
+            if (!IntCheck.isInteger(doubleField.getText())) {
+               errorMsg += "Doubles" + notIntMsg;
             }
-            if (batter_bo < 1 || batter_bo > 9) {
-                errorMsg += "Batting Order must be a number from 1 to 9.\n";
+            if (!IntCheck.isInteger(tripleField.getText())) {
+               errorMsg += "Triples" + notIntMsg;
             }
-            
-            // if an error is found, print the error message
-            if (errorMsg.length() > 0) {
-                Alert alert = new Alert(Alert.AlertType.ERROR);
-                alert.setHeaderText("Error");
-                alert.setContentText(errorMsg);
-                alert.showAndWait();
-            } else {
-                // Insert record into 
-                baseball_stats_db.addGamePlayerStats(game_number, batter_pn, 
-                              batter_bo, batter_gs,
-                              batter_ab, batter_runs, batter_1b, batter_2b, 
-                              batter_3b, batter_hr, batter_bb, batter_hp, batter_rbi,
-                              batter_so, batter_gdp, batter_sba, batter_sb, 
-                              batter_sf, batter_sh, batter_lob);
-                
-                // show success message
-                Alert successAlert = new Alert(Alert.AlertType.INFORMATION);
-                successAlert.setTitle("Success");
-                successAlert.setHeaderText("Commit successful");
-                successAlert.setContentText("Data inserted successfully");
-                successAlert.showAndWait();
+            if (!IntCheck.isInteger(homeRunField.getText())) {
+               errorMsg += "Home Runs" + notIntMsg;
+            }
+            if (!IntCheck.isInteger(basesOnBallField.getText())) {
+               errorMsg += "Base-on-Balls" + notIntMsg;
+            }
+            if (!IntCheck.isInteger(runsBattedInField.getText())) {
+               errorMsg += "Runs Batted In" + notIntMsg;
+            }
+            if (!IntCheck.isInteger(strikeOutField.getText())) {
+               errorMsg += "Strike Outs" + notIntMsg;
+            }
+            if (!IntCheck.isInteger(groundedDoublePlayField.getText())) {
+               errorMsg += "Grounded Double Plays" + notIntMsg;
+            }
+            if (!IntCheck.isInteger(stolenBaseAttemptField.getText())) {
+               errorMsg += "Stolen Base Attempts" + notIntMsg;
+            }
+            if (!IntCheck.isInteger(stolenBaseSuccessField.getText())) {
+               errorMsg += "Stolen Base Successes" + notIntMsg;
+            }
+            if (!IntCheck.isInteger(sacrificeFliesField.getText())) {
+               errorMsg += "Sacrifice Flies" + notIntMsg;
+            }
+            if (!IntCheck.isInteger(sacrificeHitsField.getText())) {
+               errorMsg += "Sacrifice Hits" + notIntMsg;
+            }
+            if (!IntCheck.isInteger(leftOnBaseField.getText())) {
+               errorMsg += "Left on Base" + notIntMsg;
+            }
 
-                // clear fields
-                resetButtonClicked();
+            if (errorMsg.length() > 0) { // at least one numeric field empty or not integer          
+                alert.setContentText(errorMsg);
+                alert.showAndWait();           
+            } else { // data is good, get it, then do integrity checks
+
+                // Retrieve the data entered in each field
+                String gameInfo = gameComboBox.getSelectionModel().getSelectedItem();
+                int game_number = Integer.parseInt(gameInfo.split(" ")[1]);
+                String playerNameNumber = playerComboBox.getSelectionModel().getSelectedItem();
+                int batter_pn = Integer.parseInt(playerNameNumber.split("#")[1]);
+                int batter_gs = starterCheckBox.isSelected() ? 1 : 0; // convert boolean to int
+                int batter_bo = Integer.parseInt(battingOrderField.getText());
+                int batter_ab = Integer.parseInt(atBatField.getText());
+                int batter_runs = Integer.parseInt(runField.getText());
+                int batter_1b = Integer.parseInt(singleField.getText());
+                int batter_2b = Integer.parseInt(doubleField.getText()); 
+                int batter_3b = Integer.parseInt(tripleField.getText());
+                int batter_hr = Integer.parseInt(homeRunField.getText());
+                int batter_bb = Integer.parseInt(basesOnBallField.getText());
+                int batter_hp = Integer.parseInt(hitsByPitchField.getText());
+                int batter_rbi = Integer.parseInt(runsBattedInField.getText());
+                int batter_so = Integer.parseInt(strikeOutField.getText());
+                int batter_gdp = Integer.parseInt(groundedDoublePlayField.getText());
+                int batter_sba = Integer.parseInt(stolenBaseAttemptField.getText());
+                int batter_sb = Integer.parseInt(stolenBaseSuccessField.getText());
+                int batter_sf = Integer.parseInt(sacrificeFliesField.getText());
+                int batter_sh = Integer.parseInt(sacrificeHitsField.getText());
+                int batter_lob = Integer.parseInt(leftOnBaseField.getText());
+
+                // ensure the data entered is within proper ranges and follows logical guidelines
+
+                if (baseball_stats_db.playerStatsExistForGame(game_number, batter_pn)) {
+                    errorMsg += "Player stats already exist for the selected game.\n";
+                }
+                if (batter_ab < (batter_1b + batter_2b + batter_3b + batter_bb + batter_hp + batter_so + batter_gdp + batter_sf + batter_sh)) {
+                    errorMsg += "The At-Bats field cannot be less than the sum of the players total hits, base-on-balls, "
+                            + "hits-by-pitch, strikeouts, ground-out-dps, sacrifice flies, and sacrifice hits combined.\n";
+                }
+                if (batter_ab < (batter_runs + batter_lob)) {
+                    errorMsg += "The At-Bats field cannot be less than the sum of the players runs and left-on-bases.\n";
+                }
+                if (batter_rbi > ((4 * batter_hr) + ((batter_1b + batter_2b + batter_3b)*3) + (batter_bb + batter_hp + batter_sf + batter_sh))) {
+                    errorMsg += "The RBI's are inconsistent with the number and types of hits, base-on-balls, hits-by-pitch, "
+                            + "sacrifice flies, and sacrifice hits.\n";
+                }
+                if (batter_sb > batter_sba) {
+                    errorMsg += "Stolen base successes cannot be higher than stolen base attempts.\n";
+                }
+                if (0 > batter_ab || batter_ab > 20) {
+                    errorMsg += "The number entered in the At-Bats field must be between 0 and 20.\n";
+                }
+                if (batter_bo < 1 || batter_bo > 9) {
+                    errorMsg += "Batting Order must be a number from 1 to 9.\n";
+                }
+
+                // if an error is found, display alert
+                if (errorMsg.length() > 0) {            
+                    alert.setContentText(errorMsg);
+                    alert.showAndWait();
+                } else {
+
+                    try {
+                        // Insert record into 
+                        baseball_stats_db.addGamePlayerStats(game_number, batter_pn, 
+                                      batter_bo, batter_gs,
+                                      batter_ab, batter_runs, batter_1b, batter_2b, 
+                                      batter_3b, batter_hr, batter_bb, batter_hp, batter_rbi,
+                                      batter_so, batter_gdp, batter_sba, batter_sb, 
+                                      batter_sf, batter_sh, batter_lob);
+
+                        // show success message
+                        Alert successAlert = new Alert(Alert.AlertType.INFORMATION);
+                        successAlert.setTitle("Success");
+                        successAlert.setHeaderText("Commit successful");
+                        successAlert.setContentText("Data inserted successfully");
+                        successAlert.showAndWait();
+
+                      } catch (Exception e) {
+
+                        // show error message
+                        alert.setHeaderText("Commit failed");
+                        alert.setContentText("There was an error in adding the data to the database. Please check your information and try again");
+                        alert.showAndWait();  
+
+                      }
+
+                    // clear fields
+                    resetButtonClicked();
+                }
             }
             
-        } catch (NumberFormatException e) {
-            // show error message
-            Alert errorAlert = new Alert(Alert.AlertType.ERROR);
-            errorAlert.setTitle("Error");
-            errorAlert.setHeaderText("Commit failed");
-            errorAlert.setContentText("There was an error in adding the data to the database. Please check your information and try again");
-            errorAlert.showAndWait();
-        } catch (IllegalArgumentException e) {
-            // show error message for empty fields
-            Alert errorAlert = new Alert(Alert.AlertType.ERROR);
-            errorAlert.setTitle("Error");
-            errorAlert.setHeaderText("Commit failed");
-            errorAlert.setContentText(e.getMessage());
-            errorAlert.showAndWait();
         }
     }
     
@@ -735,6 +790,7 @@ public class App extends Application {
                 error.setTitle("Error");
                 error.setHeaderText("Submit failed");
                 error.setContentText("Player number must be between 0 and 99");
+                error.showAndWait();
             } else {
                 baseball_stats_db.addPlayer(firstName, lastName, playerNumber);
         //        // Create a new Player object with the entered data
@@ -844,8 +900,8 @@ public class App extends Application {
     
     // function to reset all data entry boxes
     private void resetButtonClicked() {
-        // reset all data input
-        gameComboBox.getSelectionModel().clearSelection();
+        // reset all data input, except gameComboBox
+        //gameComboBox.getSelectionModel().clearSelection();
         playerComboBox.getSelectionModel().clearSelection();
         starterCheckBox.setSelected(false);
         battingOrderField.setText("0");
