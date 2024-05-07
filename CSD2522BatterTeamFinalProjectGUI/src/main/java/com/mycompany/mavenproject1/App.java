@@ -27,8 +27,8 @@ Terry Pescosolido - 5/5/24 - tweaks to game report
 Terry Pescosolido - 5/5/24 - tweaks to game report to increase gridpane size and font
 Luke Dawson - 5/6/24 - added error handling for data integrity
 Terry Pescosolido - 5/6/24 - enahnced error-checking in submitButtonClicked
-Gavin Mefford-Gibbins - 5/6/2024 - Polished the "rough" game report a little bit to line it up
-Gavin Mefford-Gibbins - 5/6/2024 - Added Functionality to the Create file button on single game report page
+Gavin Mefford-Gibbins - 5/7/2024 - Polished the "rough" game report a little bit to line it up
+Gavin Mefford-Gibbins - 5/7/2024 - Added Functionality to the Create file button on single game report page
 */
 
 package com.mycompany.mavenproject1;
