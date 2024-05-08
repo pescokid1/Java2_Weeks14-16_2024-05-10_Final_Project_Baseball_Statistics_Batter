@@ -31,6 +31,7 @@ Gavin Mefford-Gibbins - 5/7/2024 - Polished the "rough" game report a little bit
 Gavin Mefford-Gibbins - 5/7/2024 - Added Functionality to the Create file button on single game report page
 Gavin Mefford-Gibbins - 5/7/2024 - fixed File write to write both types of single game report 
     and fixed spacing issue caused by long names
+Luke Dawson - 5/7/24 - added viewMultiGameReportButtonClicked function and menu. Yet to add functionality
 */
 
 package com.mycompany.mavenproject1;
@@ -174,6 +175,7 @@ public class App extends Application {
         enterPlayerButton.setOnAction(event -> enterBatterButtonClicked());
         enterGameButton.setOnAction(event -> enterGameButtonClicked());
         viewGameReportButton.setOnAction(event -> viewGameReportButtonClicked());
+        viewMultiGameReportButton.setOnAction(event -> viewMultiGameReportButtonClicked());
         
         // exit button
         Button exitButton = new Button("Exit");
@@ -534,6 +536,57 @@ public class App extends Application {
     Scene enterGameScene = new Scene(viewGameReportGrid, 1000, 800);
     primaryStage.setScene(enterGameScene);
 }
+    
+    private void viewMultiGameReportButtonClicked() {
+        // create the grid
+        GridPane viewMultiGameReportGrid = new GridPane();
+        viewMultiGameReportGrid.setAlignment(Pos.TOP_LEFT); 
+        viewMultiGameReportGrid.setPadding(new Insets(25, 25, 25, 25));
+        viewMultiGameReportGrid.setHgap(10);
+        viewMultiGameReportGrid.setVgap(10);
+        
+        // create VBoxes and HBoxes
+        VBox labelBox = new VBox(10);
+        VBox dataBox = new VBox(10);
+        HBox utilityBox = new HBox(10);
+
+        // combo box setup
+        ComboBox<String> startGameComboBox = new ComboBox<>();
+        Label startGameLabel = new Label("Start Game: ");
+        for (Game game : baseball_stats_db.getGames()) {
+            startGameComboBox.getItems().add("Game " + game.getGameNumber() + " - " + game.getGameDate() + " - " + game.getGameOpponentName());
+        }
+        
+        ComboBox<String> endGameComboBox = new ComboBox<>();
+        Label endGameLabel = new Label("End Game: ");
+        for (Game game : baseball_stats_db.getGames()) {
+            endGameComboBox.getItems().add("Game " + game.getGameNumber() + " - " + game.getGameDate() + " - " + game.getGameOpponentName());
+        }
+        
+        // add labels to the boxes and then to the grid
+        labelBox.getChildren().add(startGameLabel);
+        labelBox.getChildren().add(endGameLabel);
+        
+        dataBox.getChildren().add(startGameComboBox);
+        dataBox.getChildren().add(endGameComboBox);
+        
+        Button returnButton = new Button("Return");
+        returnButton.setOnAction(event -> returnButtonClicked());
+
+        Button createFileButton = new Button("Create File");
+        // put a function here to link to the create file function
+        
+        utilityBox.getChildren().add(returnButton);
+        utilityBox.getChildren().add(createFileButton);
+        
+        viewMultiGameReportGrid.add(labelBox, 0, 0);
+        viewMultiGameReportGrid.add(dataBox, 1, 0);
+        viewMultiGameReportGrid.add(utilityBox, 0, 1);
+        
+        // set the scene
+        Scene viewMultiGameReportScene = new Scene(viewMultiGameReportGrid, 400, 180);
+        primaryStage.setScene(viewMultiGameReportScene);
+    }
     
 private void writeReportsToFile(int gameNumber) throws IOException {
     // Find the game with the specified game number
