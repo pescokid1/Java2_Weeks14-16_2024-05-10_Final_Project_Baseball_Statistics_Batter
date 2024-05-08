@@ -373,256 +373,87 @@ public class App extends Application {
     }
     
     private void viewGameReportButtonClicked() {
-    // Create a new GridPane for layout management
-    GridPane viewGameReportGrid = new GridPane();
-    viewGameReportGrid.setAlignment(Pos.TOP_LEFT); 
-    viewGameReportGrid.setPadding(new Insets(25, 25, 25, 25));
-    viewGameReportGrid.setHgap(0);
-    viewGameReportGrid.setVgap(5);
-    
+        
+        if (baseball_stats_db.getGames().isEmpty()) {
+            // show error message if no games are found
+            Alert errorAlert = new Alert(Alert.AlertType.ERROR);
+            errorAlert.setTitle("Error");
+            errorAlert.setHeaderText("Cannot generate report");
+            errorAlert.setContentText("Please add a game before viewing a report");
+            errorAlert.showAndWait();
+        } else {
+        
+            // Create a new GridPane for layout management
+            GridPane viewGameReportGrid = new GridPane();
+            viewGameReportGrid.setAlignment(Pos.TOP_LEFT); 
+            viewGameReportGrid.setPadding(new Insets(25, 25, 25, 25));
+            viewGameReportGrid.setHgap(0);
+            viewGameReportGrid.setVgap(5);
 
-    VBox topVBox = new VBox(20);
-    HBox gameReportTopBox = new HBox(20);
 
-    // Combo box setup
-    ComboBox<String> gameComboBox = new ComboBox<>();
-    Label gameComboBoxLabel = new Label("Game: ");
-    for (Game game : baseball_stats_db.getGames()) {
-        gameComboBox.getItems().add("Game " + game.getGameNumber() + " - " + game.getGameDate() + " - " + game.getGameOpponentName());
-    }
-    gameReportTopBox.getChildren().addAll(gameComboBoxLabel, gameComboBox);
+            VBox topVBox = new VBox(20);
+            HBox gameReportTopBox = new HBox(20);
 
-    // Toggle buttons setup
-    ToggleGroup shortLongReportToggle = new ToggleGroup();
-    RadioButton shortReport = new RadioButton("Short Report");
-    shortReport.setToggleGroup(shortLongReportToggle);
-    shortReport.setSelected(true);
-    RadioButton longReport = new RadioButton("Detailed Report");
-    longReport.setToggleGroup(shortLongReportToggle);
-    gameReportTopBox.getChildren().addAll(shortReport, longReport);
-
-    topVBox.getChildren().add(gameReportTopBox);
-    viewGameReportGrid.add(topVBox, 0, 0);
-
-    // Return and create file buttons
-    HBox bottomHBox = new HBox(5);
-    Button returnButton = new Button("Return");
-    returnButton.setOnAction(event -> returnButtonClicked());
-    bottomHBox.getChildren().add(returnButton);
-
-    Button createFileButton = new Button("Create File");
-    createFileButton.setOnAction(event -> returnButtonClicked());
-    createFileButton.setOnAction(event -> {
-    int selectedGameNumber = Integer.parseInt(gameComboBox.getValue().split(" ")[1]);
-    try {
-        writeReportsToFile(selectedGameNumber);
-        // Optionally, notify the user that the file was successfully created
-        System.out.println("Report file created successfully!");
-    } catch (IOException e) {
-        // Handle any exceptions while writing to the file
-        System.err.println("Error while creating report file: " + e.getMessage());
-    }
-});
-
-    bottomHBox.getChildren().add(createFileButton);
-
-    viewGameReportGrid.add(bottomHBox, 0, 2);
-
-    VBox statsVBox = new VBox(5);
-    shortReport.setOnAction(e -> {
-        if (!createFileButton.isDisabled()) {
-            gameComboBox.fireEvent(e);
-        }
-    });
-    longReport.setOnAction(e -> {
-        if (!createFileButton.isDisabled()) {
-            gameComboBox.fireEvent(e);
-        }
-    });
-
-    gameComboBox.setOnAction(e -> {
-        createFileButton.setDisable(false);
-        int selectedGameNumber = Integer.parseInt(gameComboBox.getValue().split(" ")[1]);
-        statsVBox.getChildren().clear();
-
-        GridPane playerStatsGrid = new GridPane();
-        playerStatsGrid.setVgap(5);
-        playerStatsGrid.setHgap(10);
-
-        Font font = Font.font("Courier New", FontWeight.BOLD, FontPosture.REGULAR, 14);
-        Label headerLabel;
-
-        if (longReport.isSelected()) {
-            String[] headers = {
-                "p#", "Player", "Avg", "AB", "R", "H", "2B", "3B", "HR", "RBI", "TB", "SLG%", "BB", "HP", "SO", "GDP", "OB%", "SF", "SH", "SB-Att", "LOB"
-            };
-
-            for (int i = 0; i < headers.length; i++) {
-                headerLabel = new Label(headers[i]);
-                headerLabel.setFont(font);
-                playerStatsGrid.add(headerLabel, i, 0);
+            // Combo box setup
+            ComboBox<String> gameComboBox = new ComboBox<>();
+            Label gameComboBoxLabel = new Label("Game: ");
+            for (Game game : baseball_stats_db.getGames()) {
+                gameComboBox.getItems().add("Game " + game.getGameNumber() + " - " + game.getGameDate() + " - " + game.getGameOpponentName());
             }
+            gameReportTopBox.getChildren().addAll(gameComboBoxLabel, gameComboBox);
 
-            int rowIndex = 1;
-            for (Batter batter : baseball_stats_db.getGamePlayerStats(selectedGameNumber)) {
-                String[] batterStats = {
-                    String.valueOf(batter.getPlayerNumber()),
-                    batter.getPlayerName(),
-                    batter.getBatterAVGFormatted(),
-                    String.valueOf(batter.getBatterAB()),
-                    String.valueOf(batter.getBatterRuns()),
-                    String.valueOf(batter.getBatterHits()),
-                    String.valueOf(batter.getBatter2B()),
-                    String.valueOf(batter.getBatter3B()),
-                    String.valueOf(batter.getBatterHR()),
-                    String.valueOf(batter.getBatterRBI()),
-                    String.valueOf(batter.getBatterTB()),
-                    batter.getBatterSLGFormatted(),
-                    String.valueOf(batter.getBatterBB()),
-                    String.valueOf(batter.getBatterHP()),
-                    String.valueOf(batter.getBatterSO()),
-                    String.valueOf(batter.getBatterGDP()),
-                    batter.getBatterOBFormatted(),
-                    String.valueOf(batter.getBatterSF()),
-                    String.valueOf(batter.getBatterSH()),
-                    batter.getBatterSBSBAFormatted(),
-                    String.valueOf(batter.getBatterLOB())
-                };
+            // Toggle buttons setup
+            ToggleGroup shortLongReportToggle = new ToggleGroup();
+            RadioButton shortReport = new RadioButton("Short Report");
+            shortReport.setToggleGroup(shortLongReportToggle);
+            shortReport.setSelected(true);
+            RadioButton longReport = new RadioButton("Detailed Report");
+            longReport.setToggleGroup(shortLongReportToggle);
+            gameReportTopBox.getChildren().addAll(shortReport, longReport);
 
-                for (int colIndex = 0; colIndex < batterStats.length; colIndex++) {
-                    Label statLabel = new Label(batterStats[colIndex]);
-                    statLabel.setFont(font);
-                    playerStatsGrid.add(statLabel, colIndex, rowIndex);
-                }
-                rowIndex++;
+            topVBox.getChildren().add(gameReportTopBox);
+            viewGameReportGrid.add(topVBox, 0, 0);
+
+            // Return and create file buttons
+            HBox bottomHBox = new HBox(5);
+            Button returnButton = new Button("Return");
+            returnButton.setOnAction(event -> returnButtonClicked());
+            bottomHBox.getChildren().add(returnButton);
+
+            Button createFileButton = new Button("Create File");
+            createFileButton.setOnAction(event -> returnButtonClicked());
+            createFileButton.setOnAction(event -> {
+            int selectedGameNumber = Integer.parseInt(gameComboBox.getValue().split(" ")[1]);
+            try {
+                writeReportsToFile(selectedGameNumber);
+                // Optionally, notify the user that the file was successfully created
+                System.out.println("Report file created successfully!");
+            } catch (IOException e) {
+                // Handle any exceptions while writing to the file
+                System.err.println("Error while creating report file: " + e.getMessage());
             }
-        }else if (shortReport.isSelected()) {
-        // Short report
-        String[] headers = {"Player", "AB", "R", "H", "RBI", "BB", "SO", "LOB"};
+            });
 
-        for (int i = 0; i < headers.length; i++) {
-            headerLabel = new Label(headers[i]);
-            headerLabel.setFont(font);
-            playerStatsGrid.add(headerLabel, i, 0);
-        }
+            bottomHBox.getChildren().add(createFileButton);
 
-        int rowIndex = 1;
-        for (Batter batter : baseball_stats_db.getGamePlayerStats(selectedGameNumber)) {
-            String[] batterStats = {
-                batter.getPlayerName(),
-                String.valueOf(batter.getBatterAB()),
-                String.valueOf(batter.getBatterRuns()),
-                String.valueOf(batter.getBatterHits()),
-                String.valueOf(batter.getBatterRBI()),
-                String.valueOf(batter.getBatterBB()),
-                String.valueOf(batter.getBatterSO()),
-                String.valueOf(batter.getBatterLOB())
-            };
+            viewGameReportGrid.add(bottomHBox, 0, 2);
 
-            for (int colIndex = 0; colIndex < batterStats.length; colIndex++) {
-                Label statLabel = new Label(batterStats[colIndex]);
-                statLabel.setFont(font);
-                playerStatsGrid.add(statLabel, colIndex, rowIndex);
-            }
-            rowIndex++;
-        }
-    }
-
-    statsVBox.getChildren().add(playerStatsGrid);
-});
-
-    viewGameReportGrid.add(statsVBox, 0, 3);
-
-    // Create a scene and set it to the primary stage
-    Scene enterGameScene = new Scene(viewGameReportGrid, 1000, 800);
-    primaryStage.setScene(enterGameScene);
-}
-
-    private void viewMultiGameReportButtonClicked() {
-        // create the grid
-        GridPane viewGameReportGrid = new GridPane();
-        viewGameReportGrid.setAlignment(Pos.TOP_LEFT); 
-        viewGameReportGrid.setPadding(new Insets(25, 25, 25, 25));
-        viewGameReportGrid.setHgap(10);
-        viewGameReportGrid.setVgap(10);
-        
-        // create VBoxes and HBoxes
-        VBox labelBox = new VBox(10);
-        VBox dataBox = new VBox(10);
-        HBox utilityBox = new HBox(10);
-
-        // combo box setup
-        ComboBox<String> startGameComboBox = new ComboBox<>();
-        Label startGameLabel = new Label("Start Game: ");
-        for (Game game : baseball_stats_db.getGames()) {
-            startGameComboBox.getItems().add("Game " + game.getGameNumber() + " - " + game.getGameDate() + " - " + game.getGameOpponentName());
-        }
-        
-        ComboBox<String> endGameComboBox = new ComboBox<>();
-        Label endGameLabel = new Label("End Game: ");
-        for (Game game : baseball_stats_db.getGames()) {
-            endGameComboBox.getItems().add("Game " + game.getGameNumber() + " - " + game.getGameDate() + " - " + game.getGameOpponentName());
-        }
-        
-        // add labels to the boxes and then to the grid
-        labelBox.getChildren().add(startGameLabel);
-        labelBox.getChildren().add(endGameLabel);
-        
-        dataBox.getChildren().add(startGameComboBox);
-        dataBox.getChildren().add(endGameComboBox);
-        
-        Button returnButton = new Button("Return");
-        returnButton.setOnAction(event -> returnButtonClicked());
-
-        Button createFileButton = new Button("Create File");
-        // put a function here to link to the create file function
-        
-        utilityBox.getChildren().add(returnButton);
-        utilityBox.getChildren().add(createFileButton);
-        
-        viewGameReportGrid.add(labelBox, 0, 0);
-        viewGameReportGrid.add(dataBox, 1, 0);
-        viewGameReportGrid.add(utilityBox, 0, 1);
-
-        VBox topVBox = new VBox(20);
-        HBox gameReportTopBox = new HBox(20);
-
-        // ArrayList setup for selected games
-        ArrayList<String> selectedGames = new ArrayList<>();
-
-        // CheckBox setup for each game
-        for (Game game : baseball_stats_db.getGames()) {
-            CheckBox checkBox = new CheckBox("Game " + game.getGameNumber() + " - " + game.getGameDate() + " - " + game.getGameOpponentName());
-            checkBox.setOnAction(event -> {
-                if (checkBox.isSelected()) {
-                    selectedGames.add(checkBox.getText());
-                } else {
-                    selectedGames.remove(checkBox.getText());
+            VBox statsVBox = new VBox(5);
+            shortReport.setOnAction(e -> {
+                if (!createFileButton.isDisabled()) {
+                    gameComboBox.fireEvent(e);
                 }
             });
-            gameReportTopBox.getChildren().add(checkBox);
-        }
-        
-        createFileButton.setOnAction(event -> {
-            for (String selectedGame : selectedGames) {
-                int selectedGameNumber = Integer.parseInt(selectedGame.split(" ")[1]);
-                try {
-                    writeReportsToFile(selectedGameNumber);
-                    // Optionally, notify the user that the file was successfully created
-                    System.out.println("Report file for Game " + selectedGameNumber + " created successfully!");
-                } catch (IOException e) {
-                    // Handle any exceptions while writing to the file
-                    System.err.println("Error while creating report file for Game " + selectedGameNumber + ": " + e.getMessage());
+            longReport.setOnAction(e -> {
+                if (!createFileButton.isDisabled()) {
+                    gameComboBox.fireEvent(e);
                 }
-            }
-        });
+            });
 
-        VBox statsVBox = new VBox(5);
-
-        createFileButton.setOnAction(event -> {
-            statsVBox.getChildren().clear();
-            for (String selectedGame : selectedGames) {
-                int selectedGameNumber = Integer.parseInt(selectedGame.split(" ")[1]);
+            gameComboBox.setOnAction(e -> {
+                createFileButton.setDisable(false);
+                int selectedGameNumber = Integer.parseInt(gameComboBox.getValue().split(" ")[1]);
+                statsVBox.getChildren().clear();
 
                 GridPane playerStatsGrid = new GridPane();
                 playerStatsGrid.setVgap(5);
@@ -631,8 +462,7 @@ public class App extends Application {
                 Font font = Font.font("Courier New", FontWeight.BOLD, FontPosture.REGULAR, 14);
                 Label headerLabel;
 
-                //if (longReport.isSelected()) {
-                    // Detailed report
+                if (longReport.isSelected()) {
                     String[] headers = {
                         "p#", "Player", "Avg", "AB", "R", "H", "2B", "3B", "HR", "RBI", "TB", "SLG%", "BB", "HP", "SO", "GDP", "OB%", "SF", "SH", "SB-Att", "LOB"
                     };
@@ -676,49 +506,239 @@ public class App extends Application {
                         }
                         rowIndex++;
                     }
-                /*
-                } else if (shortReport.isSelected()) {
-                    // Short report
-                    String[] headers = {"Player", "AB", "R", "H", "RBI", "BB", "SO", "LOB"};
+                }else if (shortReport.isSelected()) {
+                // Short report
+                String[] headers = {"Player", "AB", "R", "H", "RBI", "BB", "SO", "LOB"};
 
-                    for (int i = 0; i < headers.length; i++) {
-                        headerLabel = new Label(headers[i]);
-                        headerLabel.setFont(font);
-                        playerStatsGrid.add(headerLabel, i, 0);
-                    }
-
-                    int rowIndex = 1;
-                    for (Batter batter : baseball_stats_db.getGamePlayerStats(selectedGameNumber)) {
-                        String[] batterStats = {
-                            batter.getPlayerName(),
-                            String.valueOf(batter.getBatterAB()),
-                            String.valueOf(batter.getBatterRuns()),
-                            String.valueOf(batter.getBatterHits()),
-                            String.valueOf(batter.getBatterRBI()),
-                            String.valueOf(batter.getBatterBB()),
-                            String.valueOf(batter.getBatterSO()),
-                            String.valueOf(batter.getBatterLOB())
-                        };
-
-                        for (int colIndex = 0; colIndex < batterStats.length; colIndex++) {
-                            Label statLabel = new Label(batterStats[colIndex]);
-                            statLabel.setFont(font);
-                            playerStatsGrid.add(statLabel, colIndex, rowIndex);
-                        }
-                        rowIndex++;
-                    }
+                for (int i = 0; i < headers.length; i++) {
+                    headerLabel = new Label(headers[i]);
+                    headerLabel.setFont(font);
+                    playerStatsGrid.add(headerLabel, i, 0);
                 }
-                */
 
-                statsVBox.getChildren().add(playerStatsGrid);
+                int rowIndex = 1;
+                for (Batter batter : baseball_stats_db.getGamePlayerStats(selectedGameNumber)) {
+                    String[] batterStats = {
+                        batter.getPlayerName(),
+                        String.valueOf(batter.getBatterAB()),
+                        String.valueOf(batter.getBatterRuns()),
+                        String.valueOf(batter.getBatterHits()),
+                        String.valueOf(batter.getBatterRBI()),
+                        String.valueOf(batter.getBatterBB()),
+                        String.valueOf(batter.getBatterSO()),
+                        String.valueOf(batter.getBatterLOB())
+                    };
+
+                    for (int colIndex = 0; colIndex < batterStats.length; colIndex++) {
+                        Label statLabel = new Label(batterStats[colIndex]);
+                        statLabel.setFont(font);
+                        playerStatsGrid.add(statLabel, colIndex, rowIndex);
+                    }
+                    rowIndex++;
+                }
             }
+
+            statsVBox.getChildren().add(playerStatsGrid);
         });
 
-        viewGameReportGrid.add(statsVBox, 0, 3);
+            viewGameReportGrid.add(statsVBox, 0, 3);
 
-        // Create a scene and set it to the primary stage
-        Scene enterGameScene = new Scene(viewGameReportGrid, 1000, 800);
-        primaryStage.setScene(enterGameScene);
+            // Create a scene and set it to the primary stage
+            Scene enterGameScene = new Scene(viewGameReportGrid, 1000, 800);
+            primaryStage.setScene(enterGameScene);
+    }
+}
+
+    private void viewMultiGameReportButtonClicked() {
+        if (baseball_stats_db.getGames().size() < 2) {
+            // show error message if there are not at least 2 games
+            Alert errorAlert = new Alert(Alert.AlertType.ERROR);
+            errorAlert.setTitle("Error");
+            errorAlert.setHeaderText("Cannot generate report");
+            errorAlert.setContentText("Please add at least 2 games before viewing a multi game report");
+            errorAlert.showAndWait();
+        } else {
+            // create the grid
+            GridPane viewGameReportGrid = new GridPane();
+            viewGameReportGrid.setAlignment(Pos.TOP_LEFT); 
+            viewGameReportGrid.setPadding(new Insets(25, 25, 25, 25));
+            viewGameReportGrid.setHgap(10);
+            viewGameReportGrid.setVgap(10);
+
+            // create VBoxes and HBoxes
+            VBox labelBox = new VBox(10);
+            VBox dataBox = new VBox(10);
+            HBox utilityBox = new HBox(10);
+
+            // combo box setup
+            ComboBox<String> startGameComboBox = new ComboBox<>();
+            Label startGameLabel = new Label("Start Game: ");
+            for (Game game : baseball_stats_db.getGames()) {
+                startGameComboBox.getItems().add("Game " + game.getGameNumber() + " - " + game.getGameDate() + " - " + game.getGameOpponentName());
+            }
+
+            ComboBox<String> endGameComboBox = new ComboBox<>();
+            Label endGameLabel = new Label("End Game: ");
+            for (Game game : baseball_stats_db.getGames()) {
+                endGameComboBox.getItems().add("Game " + game.getGameNumber() + " - " + game.getGameDate() + " - " + game.getGameOpponentName());
+            }
+
+            // add labels to the boxes and then to the grid
+            labelBox.getChildren().add(startGameLabel);
+            labelBox.getChildren().add(endGameLabel);
+
+            dataBox.getChildren().add(startGameComboBox);
+            dataBox.getChildren().add(endGameComboBox);
+
+            Button returnButton = new Button("Return");
+            returnButton.setOnAction(event -> returnButtonClicked());
+
+            Button createFileButton = new Button("Create File");
+            // put a function here to link to the create file function
+
+            utilityBox.getChildren().add(returnButton);
+            utilityBox.getChildren().add(createFileButton);
+
+            viewGameReportGrid.add(labelBox, 0, 0);
+            viewGameReportGrid.add(dataBox, 1, 0);
+            viewGameReportGrid.add(utilityBox, 0, 1);
+
+            VBox topVBox = new VBox(20);
+            HBox gameReportTopBox = new HBox(20);
+
+            // ArrayList setup for selected games
+            ArrayList<String> selectedGames = new ArrayList<>();
+
+            // CheckBox setup for each game
+            for (Game game : baseball_stats_db.getGames()) {
+                CheckBox checkBox = new CheckBox("Game " + game.getGameNumber() + " - " + game.getGameDate() + " - " + game.getGameOpponentName());
+                checkBox.setOnAction(event -> {
+                    if (checkBox.isSelected()) {
+                        selectedGames.add(checkBox.getText());
+                    } else {
+                        selectedGames.remove(checkBox.getText());
+                    }
+                });
+                gameReportTopBox.getChildren().add(checkBox);
+            }
+
+            createFileButton.setOnAction(event -> {
+                for (String selectedGame : selectedGames) {
+                    int selectedGameNumber = Integer.parseInt(selectedGame.split(" ")[1]);
+                    try {
+                        writeReportsToFile(selectedGameNumber);
+                        // Optionally, notify the user that the file was successfully created
+                        System.out.println("Report file for Game " + selectedGameNumber + " created successfully!");
+                    } catch (IOException e) {
+                        // Handle any exceptions while writing to the file
+                        System.err.println("Error while creating report file for Game " + selectedGameNumber + ": " + e.getMessage());
+                    }
+                }
+            });
+
+            VBox statsVBox = new VBox(5);
+
+            createFileButton.setOnAction(event -> {
+                statsVBox.getChildren().clear();
+                for (String selectedGame : selectedGames) {
+                    int selectedGameNumber = Integer.parseInt(selectedGame.split(" ")[1]);
+
+                    GridPane playerStatsGrid = new GridPane();
+                    playerStatsGrid.setVgap(5);
+                    playerStatsGrid.setHgap(10);
+
+                    Font font = Font.font("Courier New", FontWeight.BOLD, FontPosture.REGULAR, 14);
+                    Label headerLabel;
+
+                    //if (longReport.isSelected()) {
+                        // Detailed report
+                        String[] headers = {
+                            "p#", "Player", "Avg", "AB", "R", "H", "2B", "3B", "HR", "RBI", "TB", "SLG%", "BB", "HP", "SO", "GDP", "OB%", "SF", "SH", "SB-Att", "LOB"
+                        };
+
+                        for (int i = 0; i < headers.length; i++) {
+                            headerLabel = new Label(headers[i]);
+                            headerLabel.setFont(font);
+                            playerStatsGrid.add(headerLabel, i, 0);
+                        }
+
+                        int rowIndex = 1;
+                        for (Batter batter : baseball_stats_db.getGamePlayerStats(selectedGameNumber)) {
+                            String[] batterStats = {
+                                String.valueOf(batter.getPlayerNumber()),
+                                batter.getPlayerName(),
+                                batter.getBatterAVGFormatted(),
+                                String.valueOf(batter.getBatterAB()),
+                                String.valueOf(batter.getBatterRuns()),
+                                String.valueOf(batter.getBatterHits()),
+                                String.valueOf(batter.getBatter2B()),
+                                String.valueOf(batter.getBatter3B()),
+                                String.valueOf(batter.getBatterHR()),
+                                String.valueOf(batter.getBatterRBI()),
+                                String.valueOf(batter.getBatterTB()),
+                                batter.getBatterSLGFormatted(),
+                                String.valueOf(batter.getBatterBB()),
+                                String.valueOf(batter.getBatterHP()),
+                                String.valueOf(batter.getBatterSO()),
+                                String.valueOf(batter.getBatterGDP()),
+                                batter.getBatterOBFormatted(),
+                                String.valueOf(batter.getBatterSF()),
+                                String.valueOf(batter.getBatterSH()),
+                                batter.getBatterSBSBAFormatted(),
+                                String.valueOf(batter.getBatterLOB())
+                            };
+
+                            for (int colIndex = 0; colIndex < batterStats.length; colIndex++) {
+                                Label statLabel = new Label(batterStats[colIndex]);
+                                statLabel.setFont(font);
+                                playerStatsGrid.add(statLabel, colIndex, rowIndex);
+                            }
+                            rowIndex++;
+                        }
+                    /*
+                    } else if (shortReport.isSelected()) {
+                        // Short report
+                        String[] headers = {"Player", "AB", "R", "H", "RBI", "BB", "SO", "LOB"};
+
+                        for (int i = 0; i < headers.length; i++) {
+                            headerLabel = new Label(headers[i]);
+                            headerLabel.setFont(font);
+                            playerStatsGrid.add(headerLabel, i, 0);
+                        }
+
+                        int rowIndex = 1;
+                        for (Batter batter : baseball_stats_db.getGamePlayerStats(selectedGameNumber)) {
+                            String[] batterStats = {
+                                batter.getPlayerName(),
+                                String.valueOf(batter.getBatterAB()),
+                                String.valueOf(batter.getBatterRuns()),
+                                String.valueOf(batter.getBatterHits()),
+                                String.valueOf(batter.getBatterRBI()),
+                                String.valueOf(batter.getBatterBB()),
+                                String.valueOf(batter.getBatterSO()),
+                                String.valueOf(batter.getBatterLOB())
+                            };
+
+                            for (int colIndex = 0; colIndex < batterStats.length; colIndex++) {
+                                Label statLabel = new Label(batterStats[colIndex]);
+                                statLabel.setFont(font);
+                                playerStatsGrid.add(statLabel, colIndex, rowIndex);
+                            }
+                            rowIndex++;
+                        }
+                    }
+                    */
+
+                    statsVBox.getChildren().add(playerStatsGrid);
+                }
+            });
+
+            viewGameReportGrid.add(statsVBox, 0, 3);
+
+            // Create a scene and set it to the primary stage
+            Scene enterGameScene = new Scene(viewGameReportGrid, 1000, 800);
+            primaryStage.setScene(enterGameScene);
+        }
     }
 
 
