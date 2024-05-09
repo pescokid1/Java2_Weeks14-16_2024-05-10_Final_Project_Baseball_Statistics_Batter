@@ -41,6 +41,7 @@ Terry Pescosolido - 5/9/24 - updated writeReportsToFile to use buildReportLines
 Luke Dawson - 5/9/24 - added check on enter player stats button to ensure a player and a game exists
 Gavin Mefford-Gibbins - 5/9/2024 - Added functioning return button and file print button to the multi game report
 Gavin Mefford-Gibbins - 5/9/2024 - Fixed formatting in the multi game report to accomodate for longer names
+Gavin Mefford-Gibbins - 5/9/2024 - Fixed width of scrollpane in multi game report
  */
 package com.mycompany.mavenproject1;
 
@@ -557,6 +558,9 @@ public class App extends Application {
         ScrollPane scrollPane = new ScrollPane(); // Create a ScrollPane
         scrollPane.setContent(statsBox); // Set the VBox inside the ScrollPane
         scrollPane.setFitToWidth(true); // Ensure the width fits to the content
+        scrollPane.setPrefWidth(1100); // Set the preferred width of the ScrollPane to 1100 pixels
+
+        
 
         // Set up event handlers for buttons
         viewReportButton.setOnAction(event -> {
