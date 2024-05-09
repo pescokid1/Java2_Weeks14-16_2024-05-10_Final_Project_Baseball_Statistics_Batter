@@ -37,6 +37,7 @@ Luke Dawson - 5/8/24 - added checks on main menu report buttons to assure enough
 Terry Pescosolido - 5/8/24 - added totals to and tweaked formatting on game reports, restored totals to online game reports
 Gavin Mefford-Gibbins - 5/8/2024 - added rough functionality to the MultiGameReport option
 Terry Pescosolido - 5/9/24 - add buildReportLines to build all report lines for a game or multi-game, updated online game display to use
+Terry Pescosolido - 5/9/24 - updated writeReportsToFile to use buildReportLines
 */ 
 
 package com.mycompany.mavenproject1;
@@ -609,99 +610,137 @@ private void writeReportsToFile(int gameNumber) throws IOException {
     String simpleFileName = "Game " + game.getGameNumber() + " - " + game.getGameDate() + " - " + game.getGameOpponentName() + "_Simple" + ".txt";
 
     // Detailed report
-    try (FileWriter detailedWriter = new FileWriter(detailedFileName)) {
-        String headerFormat = "%-5s\t%-20s\t%5s\t%3s\t%3s\t%3s\t%3s\t%3s\t%3s\t%4s\t%3s\t%6s\t%3s\t%3s\t%3s\t%4s\t%6s\t%3s\t%3s\t%7s\t%4s\n";
-        String[] headers = {
-            "p#", "Player", "Avg", "AB", "R", "H", "2B", "3B", "HR", "RBI", "TB", "SLG%", "BB", "HP", "SO", "GDP", "OB%", "SF", "SH", "SB-Att", "LOB"
-        };
-        detailedWriter.write(String.format(headerFormat, (Object[]) headers));
-
-        String dataRowFormat = "%2d\t%-20s\t%5s\t%3d\t%3d\t%3d\t%3d\t%3d\t%3d\t%4d\t%3d\t%6s\t%3d\t%3d\t%3d\t%4d\t%6s\t%3d\t%3d\t%7s\t%4d\n";
-        for (Batter batter : baseball_stats_db.getGamePlayerStats(gameNumber)) {
-            detailedWriter.write(String.format(dataRowFormat,
-                batter.getPlayerNumber(),
-                batter.getPlayerName(),
-                batter.getBatterAVGFormatted(),
-                batter.getBatterAB(),
-                batter.getBatterRuns(),
-                batter.getBatterHits(),
-                batter.getBatter2B(),
-                batter.getBatter3B(),
-                batter.getBatterHR(),
-                batter.getBatterRBI(),
-                batter.getBatterTB(),
-                batter.getBatterSLGFormatted(),
-                batter.getBatterBB(),
-                batter.getBatterHP(),
-                batter.getBatterSO(),
-                batter.getBatterGDP(),
-                batter.getBatterOBFormatted(),
-                batter.getBatterSF(),
-                batter.getBatterSH(),
-                batter.getBatterSBSBAFormatted(),
-                batter.getBatterLOB()
-            ));
+    try (FileWriter detailedWriter = new FileWriter(detailedFileName)) { 
+        for (String line : buildReportLines(detailedGameReport, TAB, game.getGameNumber(), 0)) {
+            detailedWriter.write(line);
         }
-        dataRowFormat = "%25s\t%5s\t%3d\t%3d\t%3d\t%3d\t%3d\t%3d\t%4d\t%3d\t%6s\t%3d\t%3d\t%3d\t%4d\t%6s\t%3d\t%3d\t%7s\t%4d\n";
-        Team team = baseball_stats_db.getGameTeamStats(gameNumber);
-            detailedWriter.write(String.format(dataRowFormat,
-                "Total ",
-                team.getTeamAVGFormatted(),
-                team.getTeamAB(),
-                team.getTeamRuns(),
-                team.getTeamHits(),
-                team.getTeam2B(),
-                team.getTeam3B(),
-                team.getTeamHR(),
-                team.getTeamRBI(),
-                team.getTeamTB(),
-                team.getTeamSLGFormatted(),
-                team.getTeamBB(),
-                team.getTeamHP(),
-                team.getTeamSO(),
-                team.getTeamGDP(),
-                team.getTeamOBFormatted(),
-                team.getTeamSF(),
-                team.getTeamSH(),
-                team.getTeamSBSBAFormatted(),
-                team.getTeamLOB()
-            ));
     }
 
     // Simple report
     try (FileWriter simpleWriter = new FileWriter(simpleFileName)) {
-        String headerFormat = "%-20s\t%3s\t%3s\t%3s\t%4s\t%3s\t%3s\t%4s\n";
-        String[] simpleHeaders = {"Player", "AB", "R", "H", "RBI", "BB", "SO", "LOB"};
-        simpleWriter.write(String.format(headerFormat, (Object[]) simpleHeaders));
-
-        String dataRowFormat = "%-20s\t%3d\t%3d\t%3d\t%4d\t%3d\t%3d\t%4d\n";
-        for (Batter batter : baseball_stats_db.getGamePlayerStats(gameNumber)) {
-            simpleWriter.write(String.format(dataRowFormat,
-                batter.getPlayerName(),
-                batter.getBatterAB(),
-                batter.getBatterRuns(),
-                batter.getBatterHits(),
-                batter.getBatterRBI(),
-                batter.getBatterBB(),
-                batter.getBatterSO(),
-                batter.getBatterLOB()
-            ));
+        for (String line : buildReportLines(shortGameReport, TAB, game.getGameNumber(), 0)) {
+            simpleWriter.write(line);
         }
-        
-        dataRowFormat = "%20s\t%3d\t%3d\t%3d\t%4d\t%3d\t%3d\t%4d\n";
-        Team team = baseball_stats_db.getGameTeamStats(gameNumber);
-            simpleWriter.write(String.format(dataRowFormat,
-                "Total ",
-                team.getTeamAB(),
-                team.getTeamRuns(),
-                team.getTeamHits(),
-                team.getTeamRBI(),
-                team.getTeamBB(),
-                team.getTeamSO(),
-                team.getTeamLOB()
-            ));
     }
+     
+    
 }
+
+//private void writeReportsToFile(int gameNumber) throws IOException {
+//    // Find the game with the specified game number
+//    Game game = null;
+//    for (Game g : baseball_stats_db.getGames()) {
+//        if (g.getGameNumber() == gameNumber) {
+//            game = g;
+//            break;
+//        }
+//    }
+//
+//    if (game == null) {
+//        System.out.println("Game not found!");
+//        return; // Exit if no game is found
+//    }
+//
+//    // Detailed report file name, matching the ComboBox entry
+//    String detailedFileName = "Game " + game.getGameNumber() + " - " + game.getGameDate() + " - " + game.getGameOpponentName() + "_Detailed" + ".txt";
+//    // Simple report file name
+//    String simpleFileName = "Game " + game.getGameNumber() + " - " + game.getGameDate() + " - " + game.getGameOpponentName() + "_Simple" + ".txt";
+//
+//    // Detailed report
+//    try (FileWriter detailedWriter = new FileWriter(detailedFileName)) {
+//        String headerFormat = "%-5s\t%-20s\t%5s\t%3s\t%3s\t%3s\t%3s\t%3s\t%3s\t%4s\t%3s\t%6s\t%3s\t%3s\t%3s\t%4s\t%6s\t%3s\t%3s\t%7s\t%4s\n";
+//        String[] headers = {
+//            "p#", "Player", "Avg", "AB", "R", "H", "2B", "3B", "HR", "RBI", "TB", "SLG%", "BB", "HP", "SO", "GDP", "OB%", "SF", "SH", "SB-Att", "LOB"
+//        };
+//        detailedWriter.write(String.format(headerFormat, (Object[]) headers));
+//
+//        String dataRowFormat = "%2d\t%-20s\t%5s\t%3d\t%3d\t%3d\t%3d\t%3d\t%3d\t%4d\t%3d\t%6s\t%3d\t%3d\t%3d\t%4d\t%6s\t%3d\t%3d\t%7s\t%4d\n";
+//        for (Batter batter : baseball_stats_db.getGamePlayerStats(gameNumber)) {
+//            detailedWriter.write(String.format(dataRowFormat,
+//                batter.getPlayerNumber(),
+//                batter.getPlayerName(),
+//                batter.getBatterAVGFormatted(),
+//                batter.getBatterAB(),
+//                batter.getBatterRuns(),
+//                batter.getBatterHits(),
+//                batter.getBatter2B(),
+//                batter.getBatter3B(),
+//                batter.getBatterHR(),
+//                batter.getBatterRBI(),
+//                batter.getBatterTB(),
+//                batter.getBatterSLGFormatted(),
+//                batter.getBatterBB(),
+//                batter.getBatterHP(),
+//                batter.getBatterSO(),
+//                batter.getBatterGDP(),
+//                batter.getBatterOBFormatted(),
+//                batter.getBatterSF(),
+//                batter.getBatterSH(),
+//                batter.getBatterSBSBAFormatted(),
+//                batter.getBatterLOB()
+//            ));
+//        }
+//        dataRowFormat = "%25s\t%5s\t%3d\t%3d\t%3d\t%3d\t%3d\t%3d\t%4d\t%3d\t%6s\t%3d\t%3d\t%3d\t%4d\t%6s\t%3d\t%3d\t%7s\t%4d\n";
+//        Team team = baseball_stats_db.getGameTeamStats(gameNumber);
+//            detailedWriter.write(String.format(dataRowFormat,
+//                "Total ",
+//                team.getTeamAVGFormatted(),
+//                team.getTeamAB(),
+//                team.getTeamRuns(),
+//                team.getTeamHits(),
+//                team.getTeam2B(),
+//                team.getTeam3B(),
+//                team.getTeamHR(),
+//                team.getTeamRBI(),
+//                team.getTeamTB(),
+//                team.getTeamSLGFormatted(),
+//                team.getTeamBB(),
+//                team.getTeamHP(),
+//                team.getTeamSO(),
+//                team.getTeamGDP(),
+//                team.getTeamOBFormatted(),
+//                team.getTeamSF(),
+//                team.getTeamSH(),
+//                team.getTeamSBSBAFormatted(),
+//                team.getTeamLOB()
+//            ));
+//    }
+//
+//    // Simple report
+//    try (FileWriter simpleWriter = new FileWriter(simpleFileName)) {
+//        String headerFormat = "%-20s\t%3s\t%3s\t%3s\t%4s\t%3s\t%3s\t%4s\n";
+//        String[] simpleHeaders = {"Player", "AB", "R", "H", "RBI", "BB", "SO", "LOB"};
+//        simpleWriter.write(String.format(headerFormat, (Object[]) simpleHeaders));
+//
+//        String dataRowFormat = "%-20s\t%3d\t%3d\t%3d\t%4d\t%3d\t%3d\t%4d\n";
+//        for (Batter batter : baseball_stats_db.getGamePlayerStats(gameNumber)) {
+//            simpleWriter.write(String.format(dataRowFormat,
+//                batter.getPlayerName(),
+//                batter.getBatterAB(),
+//                batter.getBatterRuns(),
+//                batter.getBatterHits(),
+//                batter.getBatterRBI(),
+//                batter.getBatterBB(),
+//                batter.getBatterSO(),
+//                batter.getBatterLOB()
+//            ));
+//        }
+//        
+//        dataRowFormat = "%20s\t%3d\t%3d\t%3d\t%4d\t%3d\t%3d\t%4d\n";
+//        Team team = baseball_stats_db.getGameTeamStats(gameNumber);
+//            simpleWriter.write(String.format(dataRowFormat,
+//                "Total ",
+//                team.getTeamAB(),
+//                team.getTeamRuns(),
+//                team.getTeamHits(),
+//                team.getTeamRBI(),
+//                team.getTeamBB(),
+//                team.getTeamSO(),
+//                team.getTeamLOB()
+//            ));
+//    }
+//}
+
 
     private List<String> buildReportLines(String typeReport, String betweenColumnChar, int startGameNumber, int endGameNumber) {
         // this method build all the output lines for a game or multi-game report,
