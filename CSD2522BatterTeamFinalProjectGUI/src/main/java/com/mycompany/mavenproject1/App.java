@@ -38,6 +38,7 @@ Terry Pescosolido - 5/8/24 - added totals to and tweaked formatting on game repo
 Gavin Mefford-Gibbins - 5/8/2024 - added rough functionality to the MultiGameReport option
 Terry Pescosolido - 5/9/24 - add buildReportLines to build all report lines for a game or multi-game, updated online game display to use
 Terry Pescosolido - 5/9/24 - updated writeReportsToFile to use buildReportLines
+Luke Dawson - 5/9/24 - added check on enter player stats button to ensure a player and a game exists
 */ 
 
 package com.mycompany.mavenproject1;
@@ -210,97 +211,106 @@ public class App extends Application {
     
     // method for when the user selects the "Enter Data" button
     private void enterDataButtonClicked() {
-        // create a new scene for entering data
-        GridPane enterDataGrid = new GridPane();
-        enterDataGrid.setAlignment(Pos.TOP_LEFT);
-        enterDataGrid.setPadding(new Insets(25, 25, 25, 25));
-        enterDataGrid.setHgap(10);
-        enterDataGrid.setVgap(10); 
-        
-        gameComboBox.getItems().clear();
-        for (Game game : baseball_stats_db.getGames()) {
-            gameComboBox.getItems().add("Game " + game.getGameNumber() + " - " + game.getGameDate() + " - " + game.getGameOpponentName()); // Add game names to ComboBox
-        }
-        enterDataGrid.add(gameComboBox, 1, 1, 1, 1);
-        
-        playerComboBox.getItems().clear();
-        for (Player player : baseball_stats_db.getPlayers()) {
-            playerComboBox.getItems().add(player.getPlayerName() + " #" + player.getPlayerNumber()); // Add player names to ComboBox
-        }
-        enterDataGrid.add(playerComboBox, 1, 1, 1, 1);
-        
-        VBox labelBox1 = new VBox(18);
-        labelBox1.getChildren().add(gameLabel);
-        labelBox1.getChildren().add(playerLabel);
-        labelBox1.getChildren().add(starterLabel);
-        labelBox1.getChildren().add(battingOrderLabel);
-        labelBox1.getChildren().add(atBatLabel);
-        labelBox1.getChildren().add(runLabel);
-        labelBox1.getChildren().add(singleLabel);
-        labelBox1.getChildren().add(doubleLabel);
-        labelBox1.getChildren().add(tripleLabel);
-        labelBox1.getChildren().add(homeRunLabel);
-        enterDataGrid.add(labelBox1, 0, 0);
-        
-        VBox labelBox2 = new VBox(18);
-        labelBox2.getChildren().add(basesOnBallLabel);
-        labelBox2.getChildren().add(hitsByPitchLabel);
-        labelBox2.getChildren().add(runsBattedInLabel);
-        labelBox2.getChildren().add(strikeOutLabel);
-        labelBox2.getChildren().add(groundedDoublePlayLabel);
-        labelBox2.getChildren().add(stolenBaseAttemptLabel);
-        labelBox2.getChildren().add(stolenBaseSuccessLabel);
-        labelBox2.getChildren().add(sacrificeFliesLabel);
-        labelBox2.getChildren().add(sacrificeHitsLabel);
-        labelBox2.getChildren().add(leftOnBaseLabel);
-        enterDataGrid.add(labelBox2, 2, 0);
-        
-        VBox textFieldBox1 = new VBox(10);
-        textFieldBox1.getChildren().add(gameComboBox);
-        textFieldBox1.getChildren().add(playerComboBox);
-        textFieldBox1.getChildren().add(starterCheckBox);
-        textFieldBox1.getChildren().add(battingOrderField);
-        textFieldBox1.getChildren().add(atBatField);
-        textFieldBox1.getChildren().add(runField);
-        textFieldBox1.getChildren().add(singleField);
-        textFieldBox1.getChildren().add(doubleField);
-        textFieldBox1.getChildren().add(tripleField);
-        textFieldBox1.getChildren().add(homeRunField);
-        enterDataGrid.add(textFieldBox1, 1, 0);
-        
-        VBox textFieldBox2 = new VBox(10);
-        textFieldBox2.getChildren().add(basesOnBallField);
-        textFieldBox2.getChildren().add(hitsByPitchField);
-        textFieldBox2.getChildren().add(runsBattedInField);
-        textFieldBox2.getChildren().add(strikeOutField);
-        textFieldBox2.getChildren().add(groundedDoublePlayField);
-        textFieldBox2.getChildren().add(stolenBaseAttemptField);
-        textFieldBox2.getChildren().add(stolenBaseSuccessField);
-        textFieldBox2.getChildren().add(sacrificeFliesField);
-        textFieldBox2.getChildren().add(sacrificeHitsField);
-        textFieldBox2.getChildren().add(leftOnBaseField);
-        enterDataGrid.add(textFieldBox2, 3, 0);
+        if (baseball_stats_db.getGames().isEmpty() || baseball_stats_db.getPlayers().isEmpty()) {
+            // show error message if no games or players are found
+            Alert errorAlert = new Alert(Alert.AlertType.ERROR);
+            errorAlert.setTitle("Error");
+            errorAlert.setHeaderText("Cannot enter player stats");
+            errorAlert.setContentText("Please make sure there is at least one existing batter and game before entering stats.");
+            errorAlert.showAndWait();
+        } else {
+            // create a new scene for entering data
+            GridPane enterDataGrid = new GridPane();
+            enterDataGrid.setAlignment(Pos.TOP_LEFT);
+            enterDataGrid.setPadding(new Insets(25, 25, 25, 25));
+            enterDataGrid.setHgap(10);
+            enterDataGrid.setVgap(10); 
 
-        // add a submit button
-        Button submitButton = new Button("Submit");
-        submitButton.setOnAction(event -> submitButtonClicked());
-        // add a reset button
-        Button resetButton = new Button("Reset");
-        resetButton.setOnAction(event -> resetButtonClicked());
-        // add a return button
-        Button returnButton = new Button("Return");
-        returnButton.setOnAction(event -> returnButtonClicked());
-        
-        // HBox to hold the submit and return buttons
-        HBox submitReturnBox = new HBox(10);
-        submitReturnBox.getChildren().add(submitButton);
-        submitReturnBox.getChildren().add(resetButton);
-        submitReturnBox.getChildren().add(returnButton);
-        enterDataGrid.add(submitReturnBox, 0, 1, 2, 1);
+            gameComboBox.getItems().clear();
+            for (Game game : baseball_stats_db.getGames()) {
+                gameComboBox.getItems().add("Game " + game.getGameNumber() + " - " + game.getGameDate() + " - " + game.getGameOpponentName()); // Add game names to ComboBox
+            }
+            enterDataGrid.add(gameComboBox, 1, 1, 1, 1);
 
-        // set the new scene
-        Scene enterDataScene = new Scene(enterDataGrid);
-        primaryStage.setScene(enterDataScene);
+            playerComboBox.getItems().clear();
+            for (Player player : baseball_stats_db.getPlayers()) {
+                playerComboBox.getItems().add(player.getPlayerName() + " #" + player.getPlayerNumber()); // Add player names to ComboBox
+            }
+            enterDataGrid.add(playerComboBox, 1, 1, 1, 1);
+
+            VBox labelBox1 = new VBox(18);
+            labelBox1.getChildren().add(gameLabel);
+            labelBox1.getChildren().add(playerLabel);
+            labelBox1.getChildren().add(starterLabel);
+            labelBox1.getChildren().add(battingOrderLabel);
+            labelBox1.getChildren().add(atBatLabel);
+            labelBox1.getChildren().add(runLabel);
+            labelBox1.getChildren().add(singleLabel);
+            labelBox1.getChildren().add(doubleLabel);
+            labelBox1.getChildren().add(tripleLabel);
+            labelBox1.getChildren().add(homeRunLabel);
+            enterDataGrid.add(labelBox1, 0, 0);
+
+            VBox labelBox2 = new VBox(18);
+            labelBox2.getChildren().add(basesOnBallLabel);
+            labelBox2.getChildren().add(hitsByPitchLabel);
+            labelBox2.getChildren().add(runsBattedInLabel);
+            labelBox2.getChildren().add(strikeOutLabel);
+            labelBox2.getChildren().add(groundedDoublePlayLabel);
+            labelBox2.getChildren().add(stolenBaseAttemptLabel);
+            labelBox2.getChildren().add(stolenBaseSuccessLabel);
+            labelBox2.getChildren().add(sacrificeFliesLabel);
+            labelBox2.getChildren().add(sacrificeHitsLabel);
+            labelBox2.getChildren().add(leftOnBaseLabel);
+            enterDataGrid.add(labelBox2, 2, 0);
+
+            VBox textFieldBox1 = new VBox(10);
+            textFieldBox1.getChildren().add(gameComboBox);
+            textFieldBox1.getChildren().add(playerComboBox);
+            textFieldBox1.getChildren().add(starterCheckBox);
+            textFieldBox1.getChildren().add(battingOrderField);
+            textFieldBox1.getChildren().add(atBatField);
+            textFieldBox1.getChildren().add(runField);
+            textFieldBox1.getChildren().add(singleField);
+            textFieldBox1.getChildren().add(doubleField);
+            textFieldBox1.getChildren().add(tripleField);
+            textFieldBox1.getChildren().add(homeRunField);
+            enterDataGrid.add(textFieldBox1, 1, 0);
+
+            VBox textFieldBox2 = new VBox(10);
+            textFieldBox2.getChildren().add(basesOnBallField);
+            textFieldBox2.getChildren().add(hitsByPitchField);
+            textFieldBox2.getChildren().add(runsBattedInField);
+            textFieldBox2.getChildren().add(strikeOutField);
+            textFieldBox2.getChildren().add(groundedDoublePlayField);
+            textFieldBox2.getChildren().add(stolenBaseAttemptField);
+            textFieldBox2.getChildren().add(stolenBaseSuccessField);
+            textFieldBox2.getChildren().add(sacrificeFliesField);
+            textFieldBox2.getChildren().add(sacrificeHitsField);
+            textFieldBox2.getChildren().add(leftOnBaseField);
+            enterDataGrid.add(textFieldBox2, 3, 0);
+
+            // add a submit button
+            Button submitButton = new Button("Submit");
+            submitButton.setOnAction(event -> submitButtonClicked());
+            // add a reset button
+            Button resetButton = new Button("Reset");
+            resetButton.setOnAction(event -> resetButtonClicked());
+            // add a return button
+            Button returnButton = new Button("Return");
+            returnButton.setOnAction(event -> returnButtonClicked());
+
+            // HBox to hold the submit and return buttons
+            HBox submitReturnBox = new HBox(10);
+            submitReturnBox.getChildren().add(submitButton);
+            submitReturnBox.getChildren().add(resetButton);
+            submitReturnBox.getChildren().add(returnButton);
+            enterDataGrid.add(submitReturnBox, 0, 1, 2, 1);
+
+            // set the new scene
+            Scene enterDataScene = new Scene(enterDataGrid);
+            primaryStage.setScene(enterDataScene);
+        }
     }
     
     private void enterBatterButtonClicked() {
