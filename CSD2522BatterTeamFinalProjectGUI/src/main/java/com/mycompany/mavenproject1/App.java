@@ -39,8 +39,9 @@ Gavin Mefford-Gibbins - 5/8/2024 - added rough functionality to the MultiGameRep
 Terry Pescosolido - 5/9/24 - add buildReportLines to build all report lines for a game or multi-game, updated online game display to use
 Terry Pescosolido - 5/9/24 - updated writeReportsToFile to use buildReportLines
 Luke Dawson - 5/9/24 - added check on enter player stats button to ensure a player and a game exists
-*/ 
-
+Gavin Mefford-Gibbins - 5/9/2024 - Added functioning return button and file print button to the multi game report
+Gavin Mefford-Gibbins - 5/9/2024 - Fixed formatting in the multi game report to accomodate for longer names
+ */
 package com.mycompany.mavenproject1;
 
 import java.util.ArrayList;
@@ -76,12 +77,11 @@ import java.io.IOException;
 import java.io.FileWriter;
 import javafx.scene.control.ScrollPane;
 
-
-
 /**
  * JavaFX App
  */
 public class App extends Application {
+
     // create labels
     private Label gameLabel = new Label("Game");
     private Label playerLabel = new Label("Player:");
@@ -110,7 +110,7 @@ public class App extends Application {
     private Label gameNumberLabel = new Label("Game #");
     private Label opponentLabel = new Label("Opponent");
     private Label gameDateLabel = new Label("Game Date (M/D/YYYY)");
-    
+
     // create textfields
     private ComboBox<String> gameComboBox = new ComboBox<>();
     ComboBox<String> playerComboBox = new ComboBox<>();
@@ -122,7 +122,7 @@ public class App extends Application {
     private TextField doubleField = new TextField("0");
     private TextField tripleField = new TextField("0");
     private TextField homeRunField = new TextField("0");
-    private TextField basesOnBallField= new TextField("0");
+    private TextField basesOnBallField = new TextField("0");
     private TextField hitsByPitchField = new TextField("0");
     private TextField runsBattedInField = new TextField("0");
     private TextField strikeOutField = new TextField("0");
@@ -139,14 +139,14 @@ public class App extends Application {
     private TextField gameNumberField = new TextField();
     private TextField opponentField = new TextField();
     private DatePicker gameDatePicker = new DatePicker();
-    
+
     BaseballStatsDB baseball_stats_db = new BaseballStatsDB();
     String shortGameReport = "ShortGameReport";
     String detailedGameReport = "DetailedGameReport";
     String detailedMultiReport = "DetailedMultiReport";
     static String TAB = "\t";
     static String SPACE = " ";
-    
+
     // create the primary stage for the main menu
     private Stage primaryStage;
 
@@ -155,14 +155,14 @@ public class App extends Application {
         primaryStage = stage;
         // set title
         stage.setTitle("Baseball Stats");
-        
+
         // create a new grid
         GridPane grid = new GridPane();
         grid.setAlignment(Pos.TOP_LEFT);
         grid.setPadding(new Insets(25, 25, 25, 25));
         grid.setHgap(10);
         grid.setVgap(10);
-    
+
         // create the scene
         Scene scene = new Scene(grid, 250, 260);
 
@@ -172,26 +172,26 @@ public class App extends Application {
         Button enterGameButton = new Button("Enter New Game");
         Button viewGameReportButton = new Button("View Game Report");
         Button viewMultiGameReportButton = new Button("View Multi-Game Report");
-        
+
         // VBox to hold the different options the user can choose from
         VBox optionBox = new VBox(10);
         optionBox.getChildren().add(enterDataButton);
         optionBox.getChildren().add(enterPlayerButton);
         optionBox.getChildren().add(enterGameButton);
         optionBox.getChildren().add(viewGameReportButton);
-        optionBox.getChildren().add(viewMultiGameReportButton); 
+        optionBox.getChildren().add(viewMultiGameReportButton);
         grid.add(optionBox, 0, 0, 3, 1);
-        
+
         enterDataButton.setOnAction(event -> enterDataButtonClicked());
         enterPlayerButton.setOnAction(event -> enterBatterButtonClicked());
         enterGameButton.setOnAction(event -> enterGameButtonClicked());
         viewGameReportButton.setOnAction(event -> viewGameReportButtonClicked());
         viewMultiGameReportButton.setOnAction(event -> viewMultiGameReportButtonClicked());
-        
+
         // exit button
         Button exitButton = new Button("Exit");
         exitButton.setOnAction(event -> exitButtonClicked());
-        
+
         // HBox to hold the utility commands
         HBox utilityBox = new HBox(10);
         utilityBox.getChildren().add(exitButton);
@@ -199,16 +199,15 @@ public class App extends Application {
 
         stage.setScene(scene);
         stage.show();
-        
+
     }
-    
+
 //    // method to connect to the sql database
 //    private Connection getConnection() throws SQLException {
 //        String dbUrl = "jdbc:sqlite:baseball_batter_stats.sqlite"; // enter file name here
 //        Connection connection = DriverManager.getConnection(dbUrl);
 //        return connection;
 //    }
-    
     // method for when the user selects the "Enter Data" button
     private void enterDataButtonClicked() {
         if (baseball_stats_db.getGames().isEmpty() || baseball_stats_db.getPlayers().isEmpty()) {
@@ -224,7 +223,7 @@ public class App extends Application {
             enterDataGrid.setAlignment(Pos.TOP_LEFT);
             enterDataGrid.setPadding(new Insets(25, 25, 25, 25));
             enterDataGrid.setHgap(10);
-            enterDataGrid.setVgap(10); 
+            enterDataGrid.setVgap(10);
 
             gameComboBox.getItems().clear();
             for (Game game : baseball_stats_db.getGames()) {
@@ -312,7 +311,7 @@ public class App extends Application {
             primaryStage.setScene(enterDataScene);
         }
     }
-    
+
     private void enterBatterButtonClicked() {
         // create a new scene for entering data
         GridPane enterDataGrid = new GridPane();
@@ -320,21 +319,21 @@ public class App extends Application {
         enterDataGrid.setPadding(new Insets(25, 25, 25, 25));
         enterDataGrid.setHgap(10);
         enterDataGrid.setVgap(10);
-        
+
         VBox labelBox = new VBox(20);
         labelBox.getChildren().add(firstNameLabel);
         labelBox.getChildren().add(lastNameLabel);
         labelBox.getChildren().add(enterPlayerNumberLabel);
         //labelBox.getChildren().add(activeLabel);
         enterDataGrid.add(labelBox, 0, 0);
-        
+
         VBox textBox = new VBox(10);
         textBox.getChildren().add(firstNameField);
         textBox.getChildren().add(lastNameField);
         textBox.getChildren().add(enterPlayerNumberField);
         //textBox.getChildren().add(activeCheckBox);
         enterDataGrid.add(textBox, 1, 0);
-        
+
         Button submitButton = new Button("Submit");
         submitButton.setOnAction(event -> submitPlayerButtonClicked());
         // add a reset button
@@ -343,19 +342,19 @@ public class App extends Application {
         // add a return button
         Button returnButton = new Button("Return");
         returnButton.setOnAction(event -> returnButtonClicked());
-        
+
         // HBox to hold the submit and return buttons
         HBox submitReturnBox = new HBox(10);
         submitReturnBox.getChildren().add(submitButton);
         submitReturnBox.getChildren().add(resetButton);
         submitReturnBox.getChildren().add(returnButton);
         enterDataGrid.add(submitReturnBox, 0, 1, 2, 1);
-        
+
         // set the new scene
         Scene enterDataScene = new Scene(enterDataGrid);
         primaryStage.setScene(enterDataScene);
     }
-    
+
     private void enterGameButtonClicked() {
         // create a new scene for entering data
         GridPane enterGameGrid = new GridPane();
@@ -363,36 +362,36 @@ public class App extends Application {
         enterGameGrid.setPadding(new Insets(25, 25, 25, 25));
         enterGameGrid.setHgap(10);
         enterGameGrid.setVgap(10);
-        
+
         VBox labelBox = new VBox(20);
         labelBox.getChildren().add(gameNumberLabel);
         labelBox.getChildren().add(opponentLabel);
         labelBox.getChildren().add(gameDateLabel);
         enterGameGrid.add(labelBox, 0, 0);
-        
+
         VBox fieldBox = new VBox(10);
         fieldBox.getChildren().add(gameNumberField);
         fieldBox.getChildren().add(opponentField);
         fieldBox.getChildren().add(gameDatePicker);
         enterGameGrid.add(fieldBox, 1, 0);
-        
+
         Button submitButton = new Button("Submit");
         submitButton.setOnAction(event -> submitGameButtonClicked());
         // add a return button
         Button returnButton = new Button("Return");
         returnButton.setOnAction(event -> returnButtonClicked());
-        
+
         HBox submitReturnBox = new HBox(10);
         submitReturnBox.getChildren().add(submitButton);
         submitReturnBox.getChildren().add(returnButton);
         enterGameGrid.add(submitReturnBox, 0, 1, 2, 1);
-        
+
         Scene enterGameScene = new Scene(enterGameGrid, 400, 180);
         primaryStage.setScene(enterGameScene);
     }
-    
+
     private void viewGameReportButtonClicked() {
-          
+        // Error handling: if no games are found, show an error message
         if (baseball_stats_db.getGames().isEmpty()) {
             // show error message if no games are found
             Alert errorAlert = new Alert(Alert.AlertType.ERROR);
@@ -401,15 +400,15 @@ public class App extends Application {
             errorAlert.setContentText("Please add a game before viewing a report");
             errorAlert.showAndWait();
         } else {
-        
+
             // Create a new GridPane for layout management
             GridPane viewGameReportGrid = new GridPane();
-            viewGameReportGrid.setAlignment(Pos.TOP_LEFT); 
+            viewGameReportGrid.setAlignment(Pos.TOP_LEFT);
             viewGameReportGrid.setPadding(new Insets(25, 25, 25, 25));
             viewGameReportGrid.setHgap(0);
             viewGameReportGrid.setVgap(5);
 
-
+            // Set up the top section of the grid
             VBox topVBox = new VBox(20);
             HBox gameReportTopBox = new HBox(20);
 
@@ -442,34 +441,40 @@ public class App extends Application {
             Button createFileButton = new Button("Create File");
             createFileButton.setOnAction(event -> returnButtonClicked());
             createFileButton.setOnAction(event -> {
-            int selectedGameNumber = Integer.parseInt(gameComboBox.getValue().split(" ")[1]);
-            try {
-                writeReportsToFile(selectedGameNumber);
-                // Optionally, notify the user that the file was successfully created
-                System.out.println("Report file created successfully!");
-            } catch (IOException e) {
-                // Handle any exceptions while writing to the file
-                System.err.println("Error while creating report file: " + e.getMessage());
-            }
-        });
+                // Create report file when button is clicked
+                int selectedGameNumber = Integer.parseInt(gameComboBox.getValue().split(" ")[1]);
+                try {
+                    writeReportsToFile(selectedGameNumber);
+                    // Optionally, notify the user that the file was successfully created
+                    System.out.println("Report file created successfully!");
+                } catch (IOException e) {
+                    // Handle any exceptions while writing to the file
+                    System.err.println("Error while creating report file: " + e.getMessage());
+                }
+            });
 
             bottomHBox.getChildren().add(createFileButton);
             createFileButton.setDisable(true); // inactivate until game selected
 
             viewGameReportGrid.add(bottomHBox, 0, 2);
 
+            // Set up the stats section
             VBox statsVBox = new VBox(5);
+
+            // Set up event handlers for radio buttons
             shortReport.setOnAction(e -> {
                 if (!createFileButton.isDisabled()) {
                     gameComboBox.fireEvent(e);
                 }
             });
+
             longReport.setOnAction(e -> {
                 if (!createFileButton.isDisabled()) {
                     gameComboBox.fireEvent(e);
                 }
             });
 
+            // Set up event handler for combo box
             gameComboBox.setOnAction(e -> {
 
                 createFileButton.setDisable(false); // activate create file button
@@ -486,7 +491,7 @@ public class App extends Application {
                 if (shortReport.isSelected()) { // short report
                     for (String line : buildReportLines(shortGameReport, SPACE, selectedGameNumber, 0)) {
                         label = new Label(line);
-                        label.setFont(font);      
+                        label.setFont(font);
                         playerStatsHBox = new HBox(5); // VBox for displaying each player's stats vertically
                         playerStatsHBox.setStyle("-fx-border-color: black; -fx-padding: 5;"); // Style the VBox
                         playerStatsHBox.getChildren().add(label);
@@ -495,7 +500,7 @@ public class App extends Application {
                 } else {
                     for (String line : buildReportLines(detailedGameReport, SPACE, selectedGameNumber, 0)) {
                         label = new Label(line);
-                        label.setFont(font);      
+                        label.setFont(font);
                         playerStatsHBox = new HBox(5); // VBox for displaying each player's stats vertically
                         playerStatsHBox.setStyle("-fx-border-color: black; -fx-padding: 5;"); // Style the VBox
                         playerStatsHBox.getChildren().add(label);
@@ -509,248 +514,207 @@ public class App extends Application {
             // Create a scene and set it to the primary stage
             Scene enterGameScene = new Scene(viewGameReportGrid, 1000, 800);
             primaryStage.setScene(enterGameScene);
-    }
-}
-
-private void viewMultiGameReportButtonClicked() {
-    if (baseball_stats_db.getGames().size() < 2) {
-        Alert errorAlert = new Alert(Alert.AlertType.ERROR);
-        errorAlert.setTitle("Error");
-        errorAlert.setHeaderText("Cannot generate report");
-        errorAlert.setContentText("Please add at least 2 games before viewing a multi-game report.");
-        errorAlert.showAndWait();
-        return;
+        }
     }
 
-    GridPane reportGrid = new GridPane();
-    reportGrid.setAlignment(Pos.TOP_LEFT);
-    reportGrid.setPadding(new Insets(25, 25, 25, 25));
-    reportGrid.setHgap(10);
-    reportGrid.setVgap(10);
-
-    Label startGameLabel = new Label("Start Game:");
-    ComboBox<String> startGameComboBox = new ComboBox<>();
-    baseball_stats_db.getGames().forEach(game ->
-        startGameComboBox.getItems().add("Game " + game.getGameNumber() + " - " + game.getGameDate() + " - " + game.getGameOpponentName())
-    );
-
-    Label endGameLabel = new Label("End Game:");
-    ComboBox<String> endGameComboBox = new ComboBox<>();
-    baseball_stats_db.getGames().forEach(game ->
-        endGameComboBox.getItems().add("Game " + game.getGameNumber() + " - " + game.getGameDate() + " - " + game.getGameOpponentName())
-    );
-
-    Button viewReportButton = new Button("View Report");
-    VBox statsBox = new VBox(10);
-    ScrollPane scrollPane = new ScrollPane();  // Create a ScrollPane
-    scrollPane.setContent(statsBox);           // Set the VBox inside the ScrollPane
-    scrollPane.setFitToWidth(true);            // Ensure the width fits to the content
-
-    viewReportButton.setOnAction(event -> {
-        if (startGameComboBox.getValue() == null || endGameComboBox.getValue() == null) {
-            Alert alert = new Alert(Alert.AlertType.WARNING);
-            alert.setTitle("Selection Error");
-            alert.setHeaderText("Incomplete Selection");
-            alert.setContentText("Please select both start and end games.");
-            alert.showAndWait();
+    private void viewMultiGameReportButtonClicked() {
+        // Error handling: if there are less than 2 games, show an error message
+        if (baseball_stats_db.getGames().size() < 2) {
+            // Show error message if there are less than 2 games
+            Alert errorAlert = new Alert(Alert.AlertType.ERROR);
+            errorAlert.setTitle("Error");
+            errorAlert.setHeaderText("Cannot generate report");
+            errorAlert.setContentText("Please add at least 2 games before viewing a multi-game report.");
+            errorAlert.showAndWait();
             return;
         }
 
-        int startGameNumber = Integer.parseInt(startGameComboBox.getValue().split(" ")[1]);
-        int endGameNumber = Integer.parseInt(endGameComboBox.getValue().split(" ")[1]);
-        if (startGameNumber > endGameNumber) {
-            Alert alert = new Alert(Alert.AlertType.ERROR);
-            alert.setTitle("Invalid Selection");
-            alert.setHeaderText("Game Selection Error");
-            alert.setContentText("Start game must be before end game.");
-            alert.showAndWait();
-            return;
+        // Create a GridPane for layout management
+        GridPane reportGrid = new GridPane();
+        reportGrid.setAlignment(Pos.TOP_LEFT);
+        reportGrid.setPadding(new Insets(25, 25, 25, 25));
+        reportGrid.setHgap(10);
+        reportGrid.setVgap(10);
+
+        // Set up the start game combo box
+        Label startGameLabel = new Label("Start Game:");
+        ComboBox<String> startGameComboBox = new ComboBox<>();
+        baseball_stats_db.getGames().forEach(game -> startGameComboBox.getItems().add("Game " + game.getGameNumber() + " - " + game.getGameDate() + " - " + game.getGameOpponentName()));
+
+        // Set up the end game combo box
+        Label endGameLabel = new Label("End Game:");
+        ComboBox<String> endGameComboBox = new ComboBox<>();
+        baseball_stats_db.getGames().forEach(game -> endGameComboBox.getItems().add("Game " + game.getGameNumber() + " - " + game.getGameDate() + " - " + game.getGameOpponentName()));
+
+        // Set up buttons
+        Button returnButton = new Button("Return");
+        returnButton.setOnAction(event -> returnButtonClicked());
+        Button viewReportButton = new Button("View Report");
+        Button saveToFileButton = new Button("Save to File");
+
+        // Set up the stats box
+        VBox statsBox = new VBox(10);
+        ScrollPane scrollPane = new ScrollPane(); // Create a ScrollPane
+        scrollPane.setContent(statsBox); // Set the VBox inside the ScrollPane
+        scrollPane.setFitToWidth(true); // Ensure the width fits to the content
+
+        // Set up event handlers for buttons
+        viewReportButton.setOnAction(event -> {
+            // Check if both start and end games are selected
+            if (startGameComboBox.getValue() == null || endGameComboBox.getValue() == null) {
+                Alert alert = new Alert(Alert.AlertType.WARNING);
+                alert.setTitle("Selection Error");
+                alert.setHeaderText("Incomplete Selection");
+                alert.setContentText("Please select both start and end games.");
+                alert.showAndWait();
+                return;
+            }
+
+            // Check if start game is before end game
+            int startGameNumber = Integer.parseInt(startGameComboBox.getValue().split(" ")[1]);
+            int endGameNumber = Integer.parseInt(endGameComboBox.getValue().split(" ")[1]);
+            if (startGameNumber > endGameNumber) {
+                Alert alert = new Alert(Alert.AlertType.ERROR);
+                alert.setTitle("Invalid Selection");
+                alert.setHeaderText("Game Selection Error");
+                alert.setContentText("Start game must be before end game.");
+                alert.showAndWait();
+                return;
+            }
+
+            // Clear the stats box
+            statsBox.getChildren().clear();
+
+            // Add the header to the stats box
+            Font font = Font.font("Courier New", FontWeight.BOLD, FontPosture.REGULAR, 14);
+            String header = String.format("%-10s %-25s %-5s %-3s %-3s %-3s %-3s %-3s %-3s %-3s %-3s %-5s %-3s %-2s %-3s %-3s %-5s %-2s %-2s %-6s %-3s",
+                    "Player #", "Player Name", "AVG", "AB", "R", "H", "2B", "3B", "HR", "RBI", "TB", "SLG%", "BB", "HP", "SO", "GDP", "OB%", "SF", "SH", "SB-ATT", "LOB");
+            Label headerLabel = new Label(header);
+            headerLabel.setFont(font);
+            statsBox.getChildren().add(headerLabel);
+
+            // Get the list of batters and add their stats to the stats box
+            List<Batter> batters = baseball_stats_db.getSeasonPlayerStats(startGameNumber, endGameNumber);
+            for (Batter batter : batters) {
+                String playerStats = String.format("%-10d %-25s %-5s %-3d %-3d %-3d %-3d %-3d %-3d %-3d %-3d %-5s %-3d %-2d %-3d %-3d %-5s %-2d %-2d %-6s %-3d",
+                        batter.getPlayerNumber(), batter.getPlayerName(), batter.getBatterAVGFormatted(), batter.getBatterAB(), batter.getBatterRuns(),
+                        batter.getBatterHits(), batter.getBatter2B(), batter.getBatter3B(), batter.getBatterHR(),
+                        batter.getBatterRBI(), batter.getBatterTB(), batter.getBatterSLGFormatted(), batter.getBatterBB(), batter.getBatterHP(),
+                        batter.getBatterSO(), batter.getBatterGDP(), batter.getBatterOBFormatted(), batter.getBatterSF(), batter.getBatterSH(),
+                        batter.getBatterSBSBAFormatted(), batter.getBatterLOB());
+                Label statsLabel = new Label(playerStats);
+                statsLabel.setFont(font);
+                statsLabel.setStyle("-fx-border-color: black; -fx-border-width: 1; -fx-padding: 5;");
+                statsBox.getChildren().add(statsLabel);
+            }
+        });
+
+        // Set up event handler for save to file button
+        saveToFileButton.setOnAction(event -> {
+            int startGameNumber = Integer.parseInt(startGameComboBox.getValue().split(" ")[1]);
+            int endGameNumber = Integer.parseInt(endGameComboBox.getValue().split(" ")[1]);
+            if (startGameNumber > endGameNumber) {
+                Alert alert = new Alert(Alert.AlertType.ERROR);
+                alert.setTitle("Invalid Selection");
+                alert.setHeaderText("Game Selection Error");
+                alert.setContentText("Start game must be before end game.");
+                alert.showAndWait();
+                return;
+            }
+
+            try {
+                writeMultiGameReportToFile(startGameNumber, endGameNumber);
+                Alert successAlert = new Alert(Alert.AlertType.INFORMATION);
+                successAlert.setTitle("Success");
+                successAlert.setHeaderText("File Created Successfully");
+                successAlert.setContentText("The report has been saved to MultiGameReport_" + startGameNumber + "_to_" + endGameNumber + ".txt");
+                successAlert.showAndWait();
+            } catch (IOException e) {
+                Alert errorAlert = new Alert(Alert.AlertType.ERROR);
+                errorAlert.setTitle("Error");
+                errorAlert.setHeaderText("Failed to Save File");
+                errorAlert.setContentText("An error occurred while saving the file: " + e.getMessage());
+                errorAlert.showAndWait();
+            }
+        });
+
+        // Set up the selection box
+        VBox selectionBox = new VBox(10, startGameLabel, startGameComboBox, endGameLabel, endGameComboBox, viewReportButton, returnButton, saveToFileButton);
+
+        // Add the selection box and scroll pane to the grid pane
+        reportGrid.add(selectionBox, 0, 0);
+        reportGrid.add(scrollPane, 0, 1);
+
+        // Set up the scene and set it to the primary stage
+        Scene scene = new Scene(reportGrid, 800, 600);
+        primaryStage.setScene(scene);
+        primaryStage.show();
+    }
+
+    private void writeReportsToFile(int gameNumber) throws IOException {
+        // Find the game with the specified game number
+        Game game = null;
+        for (Game g : baseball_stats_db.getGames()) {
+            if (g.getGameNumber() == gameNumber) {
+                game = g;
+                break;
+            }
         }
 
-        statsBox.getChildren().clear();
-        Font font = Font.font("Courier New", FontWeight.BOLD, FontPosture.REGULAR, 14);
-        String header = String.format("%-10s %-20s %-5s %-3s %-3s %-3s %-3s %-3s %-3s %-3s %-3s %-5s %-3s %-2s %-3s %-3s %-5s %-2s %-2s %-6s %-3s",
-            "Player #", "Player Name", "AVG", "AB", "R", "H", "2B", "3B", "HR", "RBI", "TB", "SLG%", "BB", "HP", "SO", "GDP", "OB%", "SF", "SH", "SB-ATT", "LOB");
-        Label headerLabel = new Label(header);
-        headerLabel.setFont(font);
-        statsBox.getChildren().add(headerLabel);
+        if (game == null) {
+            System.out.println("Game not found!");
+            return; // Exit if no game is found
+        }
 
+        // Detailed report file name, matching the ComboBox entry
+        String detailedFileName = "Game " + game.getGameNumber() + " - " + game.getGameDate() + " - " + game.getGameOpponentName() + "_Detailed" + ".txt";
+        // Simple report file name
+        String simpleFileName = "Game " + game.getGameNumber() + " - " + game.getGameDate() + " - " + game.getGameOpponentName() + "_Simple" + ".txt";
+
+        // Detailed report
+        try (FileWriter detailedWriter = new FileWriter(detailedFileName)) {
+            for (String line : buildReportLines(detailedGameReport, TAB, game.getGameNumber(), 0)) {
+                detailedWriter.write(line);
+            }
+        }
+
+        // Simple report
+        try (FileWriter simpleWriter = new FileWriter(simpleFileName)) {
+            for (String line : buildReportLines(shortGameReport, TAB, game.getGameNumber(), 0)) {
+                simpleWriter.write(line);
+            }
+        }
+
+    }
+
+    private void writeMultiGameReportToFile(int startGameNumber, int endGameNumber) throws IOException {
+        // Get the list of batters for the specified start and end game numbers
         List<Batter> batters = baseball_stats_db.getSeasonPlayerStats(startGameNumber, endGameNumber);
-        for (Batter batter : batters) {
-            String playerStats = String.format("%-10d %-20s %-5s %-3d %-3d %-3d %-3d %-3d %-3d %-3d %-3d %-5s %-3d %-2d %-3d %-3d %-5s %-2d %-2d %-6s %-3d",
-                batter.getPlayerNumber(), batter.getPlayerName(), batter.getBatterAVGFormatted(), batter.getBatterAB(), batter.getBatterRuns(),
-                batter.getBatterHits(), batter.getBatter2B(), batter.getBatter3B(), batter.getBatterHR(),
-                batter.getBatterRBI(), batter.getBatterTB(), batter.getBatterSLGFormatted(), batter.getBatterBB(), batter.getBatterHP(),
-                batter.getBatterSO(), batter.getBatterGDP(), batter.getBatterOBFormatted(), batter.getBatterSF(), batter.getBatterSH(),
-                batter.getBatterSBSBAFormatted(), batter.getBatterLOB());
-            Label statsLabel = new Label(playerStats);
-            statsLabel.setFont(font);
-            statsLabel.setStyle("-fx-border-color: black; -fx-border-width: 1; -fx-padding: 5;");
-            statsBox.getChildren().add(statsLabel);
-        }
-    });
 
-    VBox selectionBox = new VBox(10, startGameLabel, startGameComboBox, endGameLabel, endGameComboBox, viewReportButton);
-    reportGrid.add(selectionBox, 0, 0);
-    reportGrid.add(scrollPane, 0, 1);  // Add the ScrollPane to the grid instead of the VBox directly
+        // Create a file name based on the start and end game numbers
+        String fileName = "MultiGameReport_" + startGameNumber + "_to_" + endGameNumber + ".txt";
 
-    Scene scene = new Scene(reportGrid, 800, 600);
-    primaryStage.setScene(scene);
-    primaryStage.show();
-}
+        // Try to create a FileWriter object to write to the file
+        try (FileWriter writer = new FileWriter(fileName)) {
+            // Create a header string with the specified format
+            String header = String.format("%-10s %-30s %-5s %-3s %-3s %-3s %-3s %-3s %-3s %-3s %-3s %-5s %-3s %-2s %-3s %-3s %-5s %-2s %-2s %-6s %-3s%n",
+                    "Player #", "Player Name", "AVG", "AB", "R", "H", "2B", "3B", "HR", "RBI", "TB", "SLG%", "BB", "HP", "SO", "GDP", "OB%", "SF", "SH", "SB-ATT", "LOB");
+            // Write the header to the file
+            writer.write(header);
 
-private void writeReportsToFile(int gameNumber) throws IOException {
-    // Find the game with the specified game number
-    Game game = null;
-    for (Game g : baseball_stats_db.getGames()) {
-        if (g.getGameNumber() == gameNumber) {
-            game = g;
-            break;
+            // Loop through each batter and write their stats to the file
+            for (Batter batter : batters) {
+                String playerStats = String.format("%-10d %-30s %-5s %-3d %-3d %-3d %-3d %-3d %-3d %-3d %-3d %-5s %-3d %-2d %-3d %-3d %-5s %-2d %-2d %-6s %-3d%n",
+                        batter.getPlayerNumber(), batter.getPlayerName(), batter.getBatterAVGFormatted(), batter.getBatterAB(), batter.getBatterRuns(),
+                        batter.getBatterHits(), batter.getBatter2B(), batter.getBatter3B(), batter.getBatterHR(),
+                        batter.getBatterRBI(), batter.getBatterTB(), batter.getBatterSLGFormatted(), batter.getBatterBB(), batter.getBatterHP(),
+                        batter.getBatterSO(), batter.getBatterGDP(), batter.getBatterOBFormatted(), batter.getBatterSF(), batter.getBatterSH(),
+                        batter.getBatterSBSBAFormatted(), batter.getBatterLOB());
+                // Write the player's stats to the file
+                writer.write(playerStats);
+            }
         }
     }
-
-    if (game == null) {
-        System.out.println("Game not found!");
-        return; // Exit if no game is found
-    }
-
-    // Detailed report file name, matching the ComboBox entry
-    String detailedFileName = "Game " + game.getGameNumber() + " - " + game.getGameDate() + " - " + game.getGameOpponentName() + "_Detailed" + ".txt";
-    // Simple report file name
-    String simpleFileName = "Game " + game.getGameNumber() + " - " + game.getGameDate() + " - " + game.getGameOpponentName() + "_Simple" + ".txt";
-
-    // Detailed report
-    try (FileWriter detailedWriter = new FileWriter(detailedFileName)) { 
-        for (String line : buildReportLines(detailedGameReport, TAB, game.getGameNumber(), 0)) {
-            detailedWriter.write(line);
-        }
-    }
-
-    // Simple report
-    try (FileWriter simpleWriter = new FileWriter(simpleFileName)) {
-        for (String line : buildReportLines(shortGameReport, TAB, game.getGameNumber(), 0)) {
-            simpleWriter.write(line);
-        }
-    }
-     
-    
-}
-
-//private void writeReportsToFile(int gameNumber) throws IOException {
-//    // Find the game with the specified game number
-//    Game game = null;
-//    for (Game g : baseball_stats_db.getGames()) {
-//        if (g.getGameNumber() == gameNumber) {
-//            game = g;
-//            break;
-//        }
-//    }
-//
-//    if (game == null) {
-//        System.out.println("Game not found!");
-//        return; // Exit if no game is found
-//    }
-//
-//    // Detailed report file name, matching the ComboBox entry
-//    String detailedFileName = "Game " + game.getGameNumber() + " - " + game.getGameDate() + " - " + game.getGameOpponentName() + "_Detailed" + ".txt";
-//    // Simple report file name
-//    String simpleFileName = "Game " + game.getGameNumber() + " - " + game.getGameDate() + " - " + game.getGameOpponentName() + "_Simple" + ".txt";
-//
-//    // Detailed report
-//    try (FileWriter detailedWriter = new FileWriter(detailedFileName)) {
-//        String headerFormat = "%-5s\t%-20s\t%5s\t%3s\t%3s\t%3s\t%3s\t%3s\t%3s\t%4s\t%3s\t%6s\t%3s\t%3s\t%3s\t%4s\t%6s\t%3s\t%3s\t%7s\t%4s\n";
-//        String[] headers = {
-//            "p#", "Player", "Avg", "AB", "R", "H", "2B", "3B", "HR", "RBI", "TB", "SLG%", "BB", "HP", "SO", "GDP", "OB%", "SF", "SH", "SB-Att", "LOB"
-//        };
-//        detailedWriter.write(String.format(headerFormat, (Object[]) headers));
-//
-//        String dataRowFormat = "%2d\t%-20s\t%5s\t%3d\t%3d\t%3d\t%3d\t%3d\t%3d\t%4d\t%3d\t%6s\t%3d\t%3d\t%3d\t%4d\t%6s\t%3d\t%3d\t%7s\t%4d\n";
-//        for (Batter batter : baseball_stats_db.getGamePlayerStats(gameNumber)) {
-//            detailedWriter.write(String.format(dataRowFormat,
-//                batter.getPlayerNumber(),
-//                batter.getPlayerName(),
-//                batter.getBatterAVGFormatted(),
-//                batter.getBatterAB(),
-//                batter.getBatterRuns(),
-//                batter.getBatterHits(),
-//                batter.getBatter2B(),
-//                batter.getBatter3B(),
-//                batter.getBatterHR(),
-//                batter.getBatterRBI(),
-//                batter.getBatterTB(),
-//                batter.getBatterSLGFormatted(),
-//                batter.getBatterBB(),
-//                batter.getBatterHP(),
-//                batter.getBatterSO(),
-//                batter.getBatterGDP(),
-//                batter.getBatterOBFormatted(),
-//                batter.getBatterSF(),
-//                batter.getBatterSH(),
-//                batter.getBatterSBSBAFormatted(),
-//                batter.getBatterLOB()
-//            ));
-//        }
-//        dataRowFormat = "%25s\t%5s\t%3d\t%3d\t%3d\t%3d\t%3d\t%3d\t%4d\t%3d\t%6s\t%3d\t%3d\t%3d\t%4d\t%6s\t%3d\t%3d\t%7s\t%4d\n";
-//        Team team = baseball_stats_db.getGameTeamStats(gameNumber);
-//            detailedWriter.write(String.format(dataRowFormat,
-//                "Total ",
-//                team.getTeamAVGFormatted(),
-//                team.getTeamAB(),
-//                team.getTeamRuns(),
-//                team.getTeamHits(),
-//                team.getTeam2B(),
-//                team.getTeam3B(),
-//                team.getTeamHR(),
-//                team.getTeamRBI(),
-//                team.getTeamTB(),
-//                team.getTeamSLGFormatted(),
-//                team.getTeamBB(),
-//                team.getTeamHP(),
-//                team.getTeamSO(),
-//                team.getTeamGDP(),
-//                team.getTeamOBFormatted(),
-//                team.getTeamSF(),
-//                team.getTeamSH(),
-//                team.getTeamSBSBAFormatted(),
-//                team.getTeamLOB()
-//            ));
-//    }
-//
-//    // Simple report
-//    try (FileWriter simpleWriter = new FileWriter(simpleFileName)) {
-//        String headerFormat = "%-20s\t%3s\t%3s\t%3s\t%4s\t%3s\t%3s\t%4s\n";
-//        String[] simpleHeaders = {"Player", "AB", "R", "H", "RBI", "BB", "SO", "LOB"};
-//        simpleWriter.write(String.format(headerFormat, (Object[]) simpleHeaders));
-//
-//        String dataRowFormat = "%-20s\t%3d\t%3d\t%3d\t%4d\t%3d\t%3d\t%4d\n";
-//        for (Batter batter : baseball_stats_db.getGamePlayerStats(gameNumber)) {
-//            simpleWriter.write(String.format(dataRowFormat,
-//                batter.getPlayerName(),
-//                batter.getBatterAB(),
-//                batter.getBatterRuns(),
-//                batter.getBatterHits(),
-//                batter.getBatterRBI(),
-//                batter.getBatterBB(),
-//                batter.getBatterSO(),
-//                batter.getBatterLOB()
-//            ));
-//        }
-//        
-//        dataRowFormat = "%20s\t%3d\t%3d\t%3d\t%4d\t%3d\t%3d\t%4d\n";
-//        Team team = baseball_stats_db.getGameTeamStats(gameNumber);
-//            simpleWriter.write(String.format(dataRowFormat,
-//                "Total ",
-//                team.getTeamAB(),
-//                team.getTeamRuns(),
-//                team.getTeamHits(),
-//                team.getTeamRBI(),
-//                team.getTeamBB(),
-//                team.getTeamSO(),
-//                team.getTeamLOB()
-//            ));
-//    }
-//}
-
 
     private List<String> buildReportLines(String typeReport, String betweenColumnChar, int startGameNumber, int endGameNumber) {
         // this method build all the output lines for a game or multi-game report,
@@ -762,16 +726,16 @@ private void writeReportsToFile(int gameNumber) throws IOException {
         // database calls
         if (typeReport.equals(shortGameReport) || typeReport.equals(detailedGameReport)) {
             batters = baseball_stats_db.getGamePlayerStats(startGameNumber);
-            team    = baseball_stats_db.getGameTeamStats(startGameNumber);
+            team = baseball_stats_db.getGameTeamStats(startGameNumber);
         } else {
             batters = baseball_stats_db.getSeasonPlayerStats(startGameNumber, endGameNumber);
-            team    = baseball_stats_db.getSeasonTeamStats(startGameNumber, endGameNumber);
+            team = baseball_stats_db.getSeasonTeamStats(startGameNumber, endGameNumber);
         }
         if (typeReport.equals(shortGameReport)) {
-            headerFormat         = "%-20s\t%3s\t%3s\t%3s\t%4s\t%3s\t%3s\t%4s\n";
+            headerFormat = "%-20s\t%3s\t%3s\t%3s\t%4s\t%3s\t%3s\t%4s\n";
             dataRowFormatBatters = "%-20s\t%3d\t%3d\t%3d\t%4d\t%3d\t%3d\t%4d\n";
-            dataRowFormatTeam    = "%20s\t%3d\t%3d\t%3d\t%4d\t%3d\t%3d\t%4d\n"; 
-            if (!betweenColumnChar.equals(TAB)) {      
+            dataRowFormatTeam = "%20s\t%3d\t%3d\t%3d\t%4d\t%3d\t%3d\t%4d\n";
+            if (!betweenColumnChar.equals(TAB)) {
                 headerFormat = headerFormat.replace(TAB, betweenColumnChar);
                 dataRowFormatBatters = dataRowFormatBatters.replace(TAB, betweenColumnChar);
                 dataRowFormatTeam = dataRowFormatTeam.replace(TAB, betweenColumnChar);
@@ -780,64 +744,61 @@ private void writeReportsToFile(int gameNumber) throws IOException {
             reportLines.add(String.format(headerFormat, headers));
             for (Batter batter : batters) {
                 reportLines.add(String.format(dataRowFormatBatters,
-                    batter.getPlayerName(), batter.getBatterAB(), batter.getBatterRuns(),
-                    batter.getBatterHits(), batter.getBatterRBI(), batter.getBatterBB(),
-                    batter.getBatterSO(), batter.getBatterLOB()));
+                        batter.getPlayerName(), batter.getBatterAB(), batter.getBatterRuns(),
+                        batter.getBatterHits(), batter.getBatterRBI(), batter.getBatterBB(),
+                        batter.getBatterSO(), batter.getBatterLOB()));
             }
             reportLines.add(String.format(dataRowFormatTeam, "Total ",
-                team.getTeamAB(), team.getTeamRuns(), team.getTeamHits(),
-                team.getTeamRBI(), team.getTeamBB(), team.getTeamSO(),
-                team.getTeamLOB()));      
+                    team.getTeamAB(), team.getTeamRuns(), team.getTeamHits(),
+                    team.getTeamRBI(), team.getTeamBB(), team.getTeamSO(),
+                    team.getTeamLOB()));
         } else { // detailed
-            headerFormat         = "%2s\t%-20s\t%5s\t%3s\t%3s\t%3s\t%3s\t%3s\t%3s\t%4s\t%3s\t%6s\t%3s\t%3s\t%3s\t%4s\t%6s\t%3s\t%3s\t%7s\t%4s\n";   
+            headerFormat = "%2s\t%-20s\t%5s\t%3s\t%3s\t%3s\t%3s\t%3s\t%3s\t%4s\t%3s\t%6s\t%3s\t%3s\t%3s\t%4s\t%6s\t%3s\t%3s\t%7s\t%4s\n";
             dataRowFormatBatters = "%2d\t%-20s\t%5s\t%3d\t%3d\t%3d\t%3d\t%3d\t%3d\t%4d\t%3d\t%6s\t%3d\t%3d\t%3d\t%4d\t%6s\t%3d\t%3d\t%7s\t%4d\n";
-            dataRowFormatTeam    = "%2s\t%20s\t%5s\t%3d\t%3d\t%3d\t%3d\t%3d\t%3d\t%4d\t%3d\t%6s\t%3d\t%3d\t%3d\t%4d\t%6s\t%3d\t%3d\t%7s\t%4d\n"; 
+            dataRowFormatTeam = "%2s\t%20s\t%5s\t%3d\t%3d\t%3d\t%3d\t%3d\t%3d\t%4d\t%3d\t%6s\t%3d\t%3d\t%3d\t%4d\t%6s\t%3d\t%3d\t%7s\t%4d\n";
             if (!betweenColumnChar.equals(TAB)) {
                 headerFormat = headerFormat.replaceAll(TAB, betweenColumnChar);
                 dataRowFormatBatters = dataRowFormatBatters.replaceAll(TAB, betweenColumnChar);
                 dataRowFormatTeam = dataRowFormatTeam.replaceAll(TAB, betweenColumnChar);
             }
             String[] headers = {
-            "p#", "Player", "Avg", "AB", "R", "H", "2B", "3B", "HR", "RBI", "TB", "SLG%", "BB", "HP", "SO", "GDP", "OB%", "SF", "SH", "SB-Att", "LOB"};
+                "p#", "Player", "Avg", "AB", "R", "H", "2B", "3B", "HR", "RBI", "TB", "SLG%", "BB", "HP", "SO", "GDP", "OB%", "SF", "SH", "SB-Att", "LOB"};
             reportLines.add(String.format(headerFormat, headers));
             for (Batter batter : batters) {
                 reportLines.add(String.format(dataRowFormatBatters,
-                    batter.getPlayerNumber(), batter.getPlayerName(),
-                    batter.getBatterAVGFormatted(), batter.getBatterAB(),
-                    batter.getBatterRuns(), batter.getBatterHits(),
-                    batter.getBatter2B(), batter.getBatter3B(),
-                    batter.getBatterHR(), batter.getBatterRBI(),
-                    batter.getBatterTB(), batter.getBatterSLGFormatted(),
-                    batter.getBatterBB(), batter.getBatterHP(),
-                    batter.getBatterSO(), batter.getBatterGDP(),
-                    batter.getBatterOBFormatted(), batter.getBatterSF(),
-                    batter.getBatterSH(), batter.getBatterSBSBAFormatted(),
-                    batter.getBatterLOB()));
+                        batter.getPlayerNumber(), batter.getPlayerName(),
+                        batter.getBatterAVGFormatted(), batter.getBatterAB(),
+                        batter.getBatterRuns(), batter.getBatterHits(),
+                        batter.getBatter2B(), batter.getBatter3B(),
+                        batter.getBatterHR(), batter.getBatterRBI(),
+                        batter.getBatterTB(), batter.getBatterSLGFormatted(),
+                        batter.getBatterBB(), batter.getBatterHP(),
+                        batter.getBatterSO(), batter.getBatterGDP(),
+                        batter.getBatterOBFormatted(), batter.getBatterSF(),
+                        batter.getBatterSH(), batter.getBatterSBSBAFormatted(),
+                        batter.getBatterLOB()));
             }
             reportLines.add(String.format(dataRowFormatTeam, "", "Total ",
-                team.getTeamAVGFormatted(), team.getTeamAB(), team.getTeamRuns(),
-                team.getTeamHits(), team.getTeam2B(), team.getTeam3B(),
-                team.getTeamHR(), team.getTeamRBI(), team.getTeamTB(),
-                team.getTeamSLGFormatted(), team.getTeamBB(),
-                team.getTeamHP(), team.getTeamSO(), team.getTeamGDP(),
-                team.getTeamOBFormatted(), team.getTeamSF(), team.getTeamSH(),
-                team.getTeamSBSBAFormatted(), team.getTeamLOB()));
+                    team.getTeamAVGFormatted(), team.getTeamAB(), team.getTeamRuns(),
+                    team.getTeamHits(), team.getTeam2B(), team.getTeam3B(),
+                    team.getTeamHR(), team.getTeamRBI(), team.getTeamTB(),
+                    team.getTeamSLGFormatted(), team.getTeamBB(),
+                    team.getTeamHP(), team.getTeamSO(), team.getTeamGDP(),
+                    team.getTeamOBFormatted(), team.getTeamSF(), team.getTeamSH(),
+                    team.getTeamSBSBAFormatted(), team.getTeamLOB()));
         }
         return reportLines;
     }
 
-
-
-    
     // when the user has all data entered, write the data to the database
     private void submitButtonClicked() {
-        
+
         String errorMsg = "";
         String notIntMsg = " is missing or not an integer\n";
-        
+
         Alert alert = new Alert(Alert.AlertType.ERROR);
         alert.setHeaderText("Error");
-        
+
         if (gameComboBox.getItems().isEmpty()) {
             errorMsg += "There are no games to select from. Go back to main menu and add at least one.\n";
         } else {
@@ -852,64 +813,64 @@ private void writeReportsToFile(int gameNumber) throws IOException {
                 errorMsg += "No player selection made.\n";
             }
         }
-        
+
         if (errorMsg.length() > 0) { // must have game and player to move on         
             alert.setContentText(errorMsg);
-            alert.showAndWait();           
+            alert.showAndWait();
         } else { // game and player selection good, now check if number fields filled in
-        
+
             if (!IntCheck.isInteger(battingOrderField.getText())) {
-               errorMsg += "Batting Order #" + notIntMsg;
+                errorMsg += "Batting Order #" + notIntMsg;
             }
             if (!IntCheck.isInteger(atBatField.getText())) {
-               errorMsg += "At-Bats" + notIntMsg;
+                errorMsg += "At-Bats" + notIntMsg;
             }
             if (!IntCheck.isInteger(runField.getText())) {
-               errorMsg += "Runs" + notIntMsg;
+                errorMsg += "Runs" + notIntMsg;
             }
             if (!IntCheck.isInteger(singleField.getText())) {
-               errorMsg += "Singles" + notIntMsg;
+                errorMsg += "Singles" + notIntMsg;
             }
             if (!IntCheck.isInteger(doubleField.getText())) {
-               errorMsg += "Doubles" + notIntMsg;
+                errorMsg += "Doubles" + notIntMsg;
             }
             if (!IntCheck.isInteger(tripleField.getText())) {
-               errorMsg += "Triples" + notIntMsg;
+                errorMsg += "Triples" + notIntMsg;
             }
             if (!IntCheck.isInteger(homeRunField.getText())) {
-               errorMsg += "Home Runs" + notIntMsg;
+                errorMsg += "Home Runs" + notIntMsg;
             }
             if (!IntCheck.isInteger(basesOnBallField.getText())) {
-               errorMsg += "Base-on-Balls" + notIntMsg;
+                errorMsg += "Base-on-Balls" + notIntMsg;
             }
             if (!IntCheck.isInteger(runsBattedInField.getText())) {
-               errorMsg += "Runs Batted In" + notIntMsg;
+                errorMsg += "Runs Batted In" + notIntMsg;
             }
             if (!IntCheck.isInteger(strikeOutField.getText())) {
-               errorMsg += "Strike Outs" + notIntMsg;
+                errorMsg += "Strike Outs" + notIntMsg;
             }
             if (!IntCheck.isInteger(groundedDoublePlayField.getText())) {
-               errorMsg += "Grounded Double Plays" + notIntMsg;
+                errorMsg += "Grounded Double Plays" + notIntMsg;
             }
             if (!IntCheck.isInteger(stolenBaseAttemptField.getText())) {
-               errorMsg += "Stolen Base Attempts" + notIntMsg;
+                errorMsg += "Stolen Base Attempts" + notIntMsg;
             }
             if (!IntCheck.isInteger(stolenBaseSuccessField.getText())) {
-               errorMsg += "Stolen Base Successes" + notIntMsg;
+                errorMsg += "Stolen Base Successes" + notIntMsg;
             }
             if (!IntCheck.isInteger(sacrificeFliesField.getText())) {
-               errorMsg += "Sacrifice Flies" + notIntMsg;
+                errorMsg += "Sacrifice Flies" + notIntMsg;
             }
             if (!IntCheck.isInteger(sacrificeHitsField.getText())) {
-               errorMsg += "Sacrifice Hits" + notIntMsg;
+                errorMsg += "Sacrifice Hits" + notIntMsg;
             }
             if (!IntCheck.isInteger(leftOnBaseField.getText())) {
-               errorMsg += "Left on Base" + notIntMsg;
+                errorMsg += "Left on Base" + notIntMsg;
             }
 
             if (errorMsg.length() > 0) { // at least one numeric field empty or not integer          
                 alert.setContentText(errorMsg);
-                alert.showAndWait();           
+                alert.showAndWait();
             } else { // data is good, get it, then do integrity checks
 
                 // Retrieve the data entered in each field
@@ -922,7 +883,7 @@ private void writeReportsToFile(int gameNumber) throws IOException {
                 int batter_ab = Integer.parseInt(atBatField.getText());
                 int batter_runs = Integer.parseInt(runField.getText());
                 int batter_1b = Integer.parseInt(singleField.getText());
-                int batter_2b = Integer.parseInt(doubleField.getText()); 
+                int batter_2b = Integer.parseInt(doubleField.getText());
                 int batter_3b = Integer.parseInt(tripleField.getText());
                 int batter_hr = Integer.parseInt(homeRunField.getText());
                 int batter_bb = Integer.parseInt(basesOnBallField.getText());
@@ -937,7 +898,6 @@ private void writeReportsToFile(int gameNumber) throws IOException {
                 int batter_lob = Integer.parseInt(leftOnBaseField.getText());
 
                 // ensure the data entered is within proper ranges and follows logical guidelines
-
                 if (baseball_stats_db.playerStatsExistForGame(game_number, batter_pn)) {
                     errorMsg += "Player stats already exist for the selected game.\n";
                 }
@@ -948,7 +908,7 @@ private void writeReportsToFile(int gameNumber) throws IOException {
                 if (batter_ab < (batter_runs + batter_lob)) {
                     errorMsg += "The At-Bats field cannot be less than the sum of the players runs and left-on-bases.\n";
                 }
-                if (batter_rbi > ((4 * batter_hr) + ((batter_1b + batter_2b + batter_3b)*3) + (batter_bb + batter_hp + batter_sf + batter_sh))) {
+                if (batter_rbi > ((4 * batter_hr) + ((batter_1b + batter_2b + batter_3b) * 3) + (batter_bb + batter_hp + batter_sf + batter_sh))) {
                     errorMsg += "The RBI's are inconsistent with the number and types of hits, base-on-balls, hits-by-pitch, "
                             + "sacrifice flies, and sacrifice hits.\n";
                 }
@@ -963,19 +923,19 @@ private void writeReportsToFile(int gameNumber) throws IOException {
                 }
 
                 // if an error is found, display alert
-                if (errorMsg.length() > 0) {            
+                if (errorMsg.length() > 0) {
                     alert.setContentText(errorMsg);
                     alert.showAndWait();
                 } else {
 
                     try {
                         // Insert record into 
-                        baseball_stats_db.addGamePlayerStats(game_number, batter_pn, 
-                                      batter_bo, batter_gs,
-                                      batter_ab, batter_runs, batter_1b, batter_2b, 
-                                      batter_3b, batter_hr, batter_bb, batter_hp, batter_rbi,
-                                      batter_so, batter_gdp, batter_sba, batter_sb, 
-                                      batter_sf, batter_sh, batter_lob);
+                        baseball_stats_db.addGamePlayerStats(game_number, batter_pn,
+                                batter_bo, batter_gs,
+                                batter_ab, batter_runs, batter_1b, batter_2b,
+                                batter_3b, batter_hr, batter_bb, batter_hp, batter_rbi,
+                                batter_so, batter_gdp, batter_sba, batter_sb,
+                                batter_sf, batter_sh, batter_lob);
 
                         // show success message
                         Alert successAlert = new Alert(Alert.AlertType.INFORMATION);
@@ -984,33 +944,33 @@ private void writeReportsToFile(int gameNumber) throws IOException {
                         successAlert.setContentText("Data inserted successfully");
                         successAlert.showAndWait();
 
-                      } catch (Exception e) {
+                    } catch (Exception e) {
 
                         // show error message
                         alert.setHeaderText("Commit failed");
                         alert.setContentText("There was an error in adding the data to the database. Please check your information and try again");
-                        alert.showAndWait();  
+                        alert.showAndWait();
 
-                      }
+                    }
 
                     // clear fields
                     resetButtonClicked();
                 }
             }
-            
+
         }
     }
-    
+
     // method to handle the submit button on the enter batter menu
     private void submitPlayerButtonClicked() {
         try {
             // ensure all fields are filled
-            if (firstNameField.getText().isEmpty() ||
-                lastNameField.getText().isEmpty() ||
-                enterPlayerNumberField.getText().isEmpty()) {
+            if (firstNameField.getText().isEmpty()
+                    || lastNameField.getText().isEmpty()
+                    || enterPlayerNumberField.getText().isEmpty()) {
                 throw new IllegalArgumentException("All fields must be filled.");
             }
-            
+
             // Retrieve the data entered in each field
             String firstName = firstNameField.getText();
             String lastName = lastNameField.getText();
@@ -1025,11 +985,11 @@ private void writeReportsToFile(int gameNumber) throws IOException {
                 error.showAndWait();
             } else {
                 baseball_stats_db.addPlayer(firstName, lastName, playerNumber);
-        //        // Create a new Player object with the entered data
-        //        Player player = new Player(playerNumber, firstName + " " + lastName, isActive);
-        //
-        //        // Add the new player to the list
-        //        players.add(player);
+                //        // Create a new Player object with the entered data
+                //        Player player = new Player(playerNumber, firstName + " " + lastName, isActive);
+                //
+                //        // Add the new player to the list
+                //        players.add(player);
 
                 // Show success message
                 //String activeStatus = isActive ? "active" : "inactive";
@@ -1049,7 +1009,7 @@ private void writeReportsToFile(int gameNumber) throws IOException {
             errorAlert.setHeaderText("Player addition failed");
             errorAlert.setContentText("Please enter a valid numeric value for player number.");
             errorAlert.showAndWait();
-        }  catch (IllegalArgumentException e) {
+        } catch (IllegalArgumentException e) {
             // show error message for empty fields
             Alert errorAlert = new Alert(Alert.AlertType.ERROR);
             errorAlert.setTitle("Error");
@@ -1058,18 +1018,18 @@ private void writeReportsToFile(int gameNumber) throws IOException {
             errorAlert.showAndWait();
         }
     }
-    
+
     private void submitGameButtonClicked() {
         try {
             // ensure all fields have a valid value
             if (gameNumberField.getText().isEmpty() || opponentField.getText().isEmpty() || gameDatePicker.getValue() == null) {
                 throw new IllegalArgumentException("All fields must be filled.");
             }
-            
+
             int gameNumber = Integer.parseInt(gameNumberField.getText());
             String opponent = opponentField.getText();
             LocalDate gameDate = gameDatePicker.getValue();
-            
+
             // if the value is entered manually, parse the date
             if (gameDatePicker.getValue() != null) {
                 gameDate = gameDatePicker.getValue();
@@ -1080,11 +1040,10 @@ private void writeReportsToFile(int gameNumber) throws IOException {
 
             baseball_stats_db.addGame(gameNumber, opponent, String.valueOf(gameDate));
 
-    //        Game game = new Game(gameNumber, opponent, String.valueOf(gameDate));
-    //        
-    //        // Add the new player to the list
-    //        games.add(game);
-
+            //        Game game = new Game(gameNumber, opponent, String.valueOf(gameDate));
+            //        
+            //        // Add the new player to the list
+            //        games.add(game);
             // Show success message
             Alert successAlert = new Alert(Alert.AlertType.INFORMATION);
             successAlert.setTitle("Success");
@@ -1116,20 +1075,19 @@ private void writeReportsToFile(int gameNumber) throws IOException {
             errorAlert.setContentText("Please enter the date in the format M/D/YYYY.");
             errorAlert.showAndWait();
         }
-        
-        
+
 //        String gameInfo = ("Game " + gameNumber + " - " + gameDate + " vs " + opponent);
 //        
 //        // Add gameInfo to gameComboBox
 //        gameComboBox.getItems().add(gameInfo);
     }
-    
+
     // function to return back to the main menu
     private void returnButtonClicked() {
         // navigate back to the main menu
         start(primaryStage);
     }
-    
+
     // function to reset all data entry boxes
     private void resetButtonClicked() {
         // reset all data input, except gameComboBox
@@ -1153,19 +1111,19 @@ private void writeReportsToFile(int gameNumber) throws IOException {
         sacrificeFliesField.setText("0");
         sacrificeHitsField.setText("0");
         leftOnBaseField.setText("0");
-        
+
         // reset data input for enter player menu
         firstNameField.setText("");
         lastNameField.setText("");
         enterPlayerNumberField.setText("");
         activeCheckBox.setSelected(false);
-            
+
         // reset data input for enter game menu
         gameNumberField.setText("");
         opponentField.setText("");
         gameDatePicker.setValue(null);
     }
-    
+
     // function to end the program
     private void exitButtonClicked() {
         System.exit(0);
@@ -1174,15 +1132,15 @@ private void writeReportsToFile(int gameNumber) throws IOException {
     public static void main(String[] args) {
         launch();
     }
-    
+
     // pad with " " to the right to the given length (n)
     public static String padRight(String s, int n) {
-      return String.format("%1$-" + n + "s", s);
+        return String.format("%1$-" + n + "s", s);
     }
 
     // pad with " " to the left to the given length (n)
     public static String padLeft(String s, int n) {
-      return String.format("%1$" + n + "s", s);
+        return String.format("%1$" + n + "s", s);
     }
 
 }
