@@ -1,6 +1,6 @@
 /*
-    Created by:  xxx
-    Created on:  05/3/2024
+    Authors: Luke Dawson, Terry Pescosolido, Cedrick Charles, Gavin Mefford-Gibbins, Wesley Morah
+    Date created: 4/24/24
     Purpose:     BaseballStats methods
     Description: This method computes stats needed for the baseball reports.
 
