@@ -1,6 +1,6 @@
 /*
-    Created by:  xxx
-    Created on:  05/10/2024
+    Authors: Luke Dawson, Terry Pescosolido, Cedrick Charles, Gavin Mefford-Gibbins, Wesley Morah
+    Date created: 4/24/24
     Purpose:     Batter methods
     Description: This method stores all the info related to a batters.
 
