@@ -46,6 +46,7 @@ Gavin Mefford-Gibbins - 5/9/2024 - Removed commented out code and fixed make the
     to be after the first game chosen.
 Terry Pescosolido - 5/10/24 - added file report headers; sort mulit-game by batting avg
 Terry Pescosolido - 5/10/24 - added protection against duplicate games and duplicate players
+Terry Pescosolido - 5/10/24 - fixed filewrite so it will overwrite if file exists
  */
 package com.mycompany.mavenproject1;
 
@@ -678,15 +679,15 @@ public class App extends Application {
         String simpleFileName = gameLabel + "_Simple" + ".txt";
 
         // Detailed report
-        try (FileWriter detailedWriter = new FileWriter(detailedFileName)) {
+        try (FileWriter detailedWriter = new FileWriter(detailedFileName, false)) {
             for (String line : buildReportLines(detailedGameReport, OSUBaseball + "\n" + gameLabel + "\n", TAB, game.getGameNumber(), 0)) {
                 detailedWriter.write(line);
             }
         }
 
         // Simple report
-        try (FileWriter simpleWriter = new FileWriter(simpleFileName)) {
-            for (String line : buildReportLines(shortGameReport, OSUBaseball + "\n" +gameLabel + "\n", TAB, game.getGameNumber(), 0)) {
+        try (FileWriter simpleWriter = new FileWriter(simpleFileName, false)) {
+            for (String line : buildReportLines(shortGameReport, OSUBaseball + "\n" + gameLabel + "\n", TAB, game.getGameNumber(), 0)) {
                 simpleWriter.write(line);
             }
         }
@@ -701,7 +702,7 @@ public class App extends Application {
         String fileName = "MultiGameReport_" + startGameNumber + "_to_" + endGameNumber + ".txt";
 
         // Try to create a FileWriter object to write to the file
-        try (FileWriter writer = new FileWriter(fileName)) {
+        try (FileWriter writer = new FileWriter(fileName, false)) {
             for (String line : buildReportLines(detailedMultiReport, 
                     OSUBaseball + "\n" +"Multiple Games Report\nGames " + startGameNumber + " thru " + endGameNumber + "\n(sorted by batting avg)\n",
                     TAB, startGameNumber, endGameNumber)) {
