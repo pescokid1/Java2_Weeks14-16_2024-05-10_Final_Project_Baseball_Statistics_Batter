@@ -10,6 +10,7 @@ Terry Pescosolido - 5/3/24  - added team stats
 Terry Pescosolido - 5/3/24  - fixed adding a player's stats
 Luke Dawson - 5/6/24 - added playerStatsExistForGame function
 Terry Pescosolido - 5/6/24  - fixed table name in playerStatsExistForGame
+Terry Pescosolido - 5/10/24  - added gameExists and playerExists
 */
 
 package com.mycompany.mavenproject1;
@@ -63,7 +64,7 @@ public class BaseballStatsDB {
                 //                " batter_positions TEXT NOT NULL" +
                 stmt.execute("CREATE TABLE IF NOT EXISTS Baseball_Team_Schedule (" +
                         //" season_year INTEGER PRIMARY KEY NOT NULL," +
-                        " Game_Number INTEGER NOT NULL," +
+                        " Game_Number INTEGER  PRIMARY KEY NOT NULL," +
                         " Game_Opponent_Name INTEGER NOT NULL," +
                         " Game_Date TExT NOT NULL)"); // fix date format
                         //" game_time TEXT NOT NULL," + // fix time format
@@ -101,8 +102,10 @@ public class BaseballStatsDB {
             ps.executeUpdate();
         } catch (SQLException e) {
             System.err.println("addGame failed: " + e);
+        } finally {
+            // close the connection
+            closeConnection();
         }
-        closeConnection();
     } 
     
     public List<Game> getGames() {
@@ -117,9 +120,11 @@ public class BaseballStatsDB {
             }
             rs.close();
         } catch (SQLException e) {
-            System.err.println("getGamess failed: " + e);
+            System.err.println("getGames failed: " + e);
+        } finally {
+            // close the connection
+            closeConnection();
         }
-        closeConnection();
         return games;
     }
    
@@ -134,8 +139,10 @@ public class BaseballStatsDB {
             ps.executeUpdate();
         } catch (SQLException e) {
             System.err.println("addPlayer failed: " + e);
+        } finally {
+            // close the connection
+            closeConnection();
         }
-        closeConnection();
     } 
     
     public List<Player> getPlayers() {
@@ -151,8 +158,10 @@ public class BaseballStatsDB {
             rs.close();
         } catch (SQLException e) {
             System.err.println("getPlayers failed: " + e);
+        } finally {
+            // close the connection
+            closeConnection();
         }
-        closeConnection();
         return players;
     }
     
@@ -196,8 +205,10 @@ public class BaseballStatsDB {
             ps.executeUpdate();
         } catch (SQLException e) {
             System.err.println("addGamePlayerStats failed: " + e);
+        } finally {
+            // close the connection
+            closeConnection();
         }
-        closeConnection();
     } 
     
     public List<Batter> getGamePlayerStats(int game_number) {
@@ -245,8 +256,10 @@ public class BaseballStatsDB {
             rs.close();
         } catch (SQLException e) {
             System.err.println("getGamePlayerStats failed: " + e);
+        } finally {
+            // close the connection
+            closeConnection();
         }
-        closeConnection();
         return batters;
     }
     
@@ -361,6 +374,72 @@ public class BaseballStatsDB {
                 // if count is greater than 0, player stats exist for the selected game
                 return count > 0;
             }
+        } catch (SQLException e) {
+            // show error message
+            Alert errorAlert = new Alert(Alert.AlertType.ERROR);
+            errorAlert.setTitle("Error");
+            errorAlert.setHeaderText("Database Error");
+            errorAlert.setContentText("An error occurred while accessing the database. Please try again later.");
+            errorAlert.showAndWait();
+        } finally {
+            // close the connection
+            closeConnection();
+        }
+
+        // return false by default (player has no stats for given game)
+        return false;
+    }
+     
+    public boolean gameExists(int gameNumber) {
+        openConnection();
+        // SQL statement to find if the player has data entered for a certain game
+        try (PreparedStatement ps = connection.prepareStatement(
+                "SELECT COUNT(*) FROM Baseball_Team_Schedule WHERE game_number = ?");) {
+            // set parameters
+            ps.setInt(1, gameNumber);
+
+            // execute query
+            ResultSet rs = ps.executeQuery();
+
+            // check if any rows are returned
+            if (rs.next()) {
+                int count = rs.getInt(1);
+                // if count is greater than 0, game already exists
+                return count > 0;
+            } 
+        } catch (SQLException e) {
+            // show error message
+            Alert errorAlert = new Alert(Alert.AlertType.ERROR);
+            errorAlert.setTitle("Error");
+            errorAlert.setHeaderText("Database Error");
+            errorAlert.setContentText("An error occurred while accessing the database. Please try again later.");
+            errorAlert.showAndWait();
+        } finally {
+            // close the connection
+            closeConnection();
+        }
+
+        // return false by default (player has no stats for given game)
+        return false;
+    }
+    
+    public boolean playerExists(int playerNumber) {
+        openConnection();
+        // SQL statement to find if the player has data entered for a certain game
+        try (PreparedStatement ps = connection.prepareStatement(
+                "SELECT COUNT(*) FROM Baseball_Player WHERE player_number = ?");) {
+            // set parameters
+            ps.setInt(1, playerNumber);
+
+            // execute query
+            ResultSet rs = ps.executeQuery();
+
+            // check if any rows are returned
+            if (rs.next()) {
+                int count = rs.getInt(1);
+                // if count is greater than 0, player already exists
+                return count > 0;
+            } 
         } catch (SQLException e) {
             // show error message
             Alert errorAlert = new Alert(Alert.AlertType.ERROR);
