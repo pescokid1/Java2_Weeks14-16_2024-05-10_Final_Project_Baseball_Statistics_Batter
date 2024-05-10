@@ -1,6 +1,6 @@
 /*
-    Created by:  xxx
-    Created on:  05/10/2024
+    Authors: Luke Dawson, Terry Pescosolido, Cedrick Charles, Gavin Mefford-Gibbins, Wesley Morah
+    Date created: 4/24/24
     Purpose:     Baseball Batter Stats DB method
     Description: This method contains all the access for the Baseball Batter Stats database.
 
