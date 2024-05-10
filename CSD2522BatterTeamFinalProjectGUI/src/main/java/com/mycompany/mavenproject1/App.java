@@ -44,6 +44,7 @@ Gavin Mefford-Gibbins - 5/9/2024 - Fixed formatting in the multi game report to 
 Gavin Mefford-Gibbins - 5/9/2024 - Fixed width of scrollpane in multi game report
 Gavin Mefford-Gibbins - 5/9/2024 - Removed commented out code and fixed make the second game in the multi game report required 
     to be after the first game chosen.
+Terry Pescosolido - 5/10/24 - added file report headers; sort mulit-game by batting avg
  */
 package com.mycompany.mavenproject1;
 
@@ -74,6 +75,7 @@ import javafx.scene.text.FontWeight;
 import javafx.scene.text.FontPosture;
 import java.io.IOException;
 import java.io.FileWriter;
+import java.util.Collections;
 import javafx.scene.control.ScrollPane;
 
 /**
@@ -145,6 +147,7 @@ public class App extends Application {
     String detailedMultiReport = "DetailedMultiReport";
     static String TAB = "\t";
     static String SPACE = " ";
+    static String OSUBaseball = "Ohio State Baseball";
 
     // create the primary stage for the main menu
     private Stage primaryStage;
@@ -482,7 +485,7 @@ public class App extends Application {
                 label.setFont(font);
 
                 if (shortReport.isSelected()) { // short report
-                    for (String line : buildReportLines(shortGameReport, SPACE, selectedGameNumber, 0)) {
+                    for (String line : buildReportLines(shortGameReport, "", SPACE, selectedGameNumber, 0)) {
                         label = new Label(line);
                         label.setFont(font);
                         playerStatsHBox = new HBox(5); // VBox for displaying each player's stats vertically
@@ -491,7 +494,7 @@ public class App extends Application {
                         statsVBox.getChildren().add(playerStatsHBox);
                     }
                 } else {
-                    for (String line : buildReportLines(detailedGameReport, SPACE, selectedGameNumber, 0)) {
+                    for (String line : buildReportLines(detailedGameReport, "", SPACE, selectedGameNumber, 0)) {
                         label = new Label(line);
                         label.setFont(font);
                         playerStatsHBox = new HBox(5); // VBox for displaying each player's stats vertically
@@ -598,7 +601,7 @@ public class App extends Application {
             Font font = Font.font("Courier New", FontWeight.BOLD, FontPosture.REGULAR, 14);
             Label label = new Label();
             label.setFont(font);
-            for (String line : buildReportLines(detailedGameReport, SPACE, startGameNumber, endGameNumber)) {
+            for (String line : buildReportLines(detailedMultiReport, "", SPACE, startGameNumber, endGameNumber)) {
                 label = new Label(line);
                 label.setFont(font);
                 playerStatsHBox = new HBox(5); // VBox for displaying each player's stats vertically
@@ -668,20 +671,21 @@ public class App extends Application {
         }
 
         // Detailed report file name, matching the ComboBox entry
-        String detailedFileName = "Game " + game.getGameNumber() + " - " + game.getGameDate() + " - " + game.getGameOpponentName() + "_Detailed" + ".txt";
+        String gameLabel = "Game " + game.getGameNumber() + " - " + game.getGameDate() + " - " + game.getGameOpponentName();
+        String detailedFileName = gameLabel + "_Detailed" + ".txt";
         // Simple report file name
-        String simpleFileName = "Game " + game.getGameNumber() + " - " + game.getGameDate() + " - " + game.getGameOpponentName() + "_Simple" + ".txt";
+        String simpleFileName = gameLabel + "_Simple" + ".txt";
 
         // Detailed report
         try (FileWriter detailedWriter = new FileWriter(detailedFileName)) {
-            for (String line : buildReportLines(detailedGameReport, TAB, game.getGameNumber(), 0)) {
+            for (String line : buildReportLines(detailedGameReport, OSUBaseball + "\n" + gameLabel + "\n", TAB, game.getGameNumber(), 0)) {
                 detailedWriter.write(line);
             }
         }
 
         // Simple report
         try (FileWriter simpleWriter = new FileWriter(simpleFileName)) {
-            for (String line : buildReportLines(shortGameReport, TAB, game.getGameNumber(), 0)) {
+            for (String line : buildReportLines(shortGameReport, OSUBaseball + "\n" +gameLabel + "\n", TAB, game.getGameNumber(), 0)) {
                 simpleWriter.write(line);
             }
         }
@@ -697,13 +701,15 @@ public class App extends Application {
 
         // Try to create a FileWriter object to write to the file
         try (FileWriter writer = new FileWriter(fileName)) {
-            for (String line : buildReportLines(detailedGameReport, TAB, startGameNumber, endGameNumber)) {
+            for (String line : buildReportLines(detailedMultiReport, 
+                    OSUBaseball + "\n" +"Multiple Games Report\nGames " + startGameNumber + " thru " + endGameNumber + "\n(sorted by batting avg)\n",
+                    TAB, startGameNumber, endGameNumber)) {
                 writer.write(line);
             }
         }
     }
 
-    private List<String> buildReportLines(String typeReport, String betweenColumnChar, int startGameNumber, int endGameNumber) {
+    private List<String> buildReportLines(String typeReport, String reportName, String betweenColumnChar, int startGameNumber, int endGameNumber) {
         // this method build all the output lines for a game or multi-game report,
         // if game, the endGameNumber parameter is ignored
         String headerFormat, dataRowFormatBatters, dataRowFormatTeam = "";
@@ -717,6 +723,9 @@ public class App extends Application {
         } else {
             batters = baseball_stats_db.getSeasonPlayerStats(startGameNumber, endGameNumber);
             team = baseball_stats_db.getSeasonTeamStats(startGameNumber, endGameNumber);
+        }
+        if (!reportName.isEmpty()) {
+            reportLines.add(reportName + "\n");
         }
         if (typeReport.equals(shortGameReport)) {
             headerFormat = "%-20s\t%3s\t%3s\t%3s\t%4s\t%3s\t%3s\t%4s\n";
@@ -740,6 +749,11 @@ public class App extends Application {
                     team.getTeamRBI(), team.getTeamBB(), team.getTeamSO(),
                     team.getTeamLOB()));
         } else { // detailed
+            if (typeReport.equals(detailedMultiReport)) {
+                if (batters.size() > 1) { // sort in reverse batter's average
+                    Collections.sort(batters, (Batter b1, Batter b2) -> b2.getBatterAVGFormatted().compareTo(b1.getBatterAVGFormatted()));
+                }
+            }
             headerFormat = "%2s\t%-20s\t%5s\t%3s\t%3s\t%3s\t%3s\t%3s\t%3s\t%4s\t%3s\t%6s\t%3s\t%3s\t%3s\t%4s\t%6s\t%3s\t%3s\t%7s\t%4s\n";
             dataRowFormatBatters = "%2d\t%-20s\t%5s\t%3d\t%3d\t%3d\t%3d\t%3d\t%3d\t%4d\t%3d\t%6s\t%3d\t%3d\t%3d\t%4d\t%6s\t%3d\t%3d\t%7s\t%4d\n";
             dataRowFormatTeam = "%2s\t%20s\t%5s\t%3d\t%3d\t%3d\t%3d\t%3d\t%3d\t%4d\t%3d\t%6s\t%3d\t%3d\t%3d\t%4d\t%6s\t%3d\t%3d\t%7s\t%4d\n";
