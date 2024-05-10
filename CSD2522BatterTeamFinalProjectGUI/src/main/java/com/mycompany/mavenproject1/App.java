@@ -42,6 +42,8 @@ Luke Dawson - 5/9/24 - added check on enter player stats button to ensure a play
 Gavin Mefford-Gibbins - 5/9/2024 - Added functioning return button and file print button to the multi game report
 Gavin Mefford-Gibbins - 5/9/2024 - Fixed formatting in the multi game report to accomodate for longer names
 Gavin Mefford-Gibbins - 5/9/2024 - Fixed width of scrollpane in multi game report
+Gavin Mefford-Gibbins - 5/9/2024 - Removed commented out code and fixed make the second game in the multi game report required 
+    to be after the first game chosen.
  */
 package com.mycompany.mavenproject1;
 
@@ -64,16 +66,12 @@ import javafx.scene.control.ToggleGroup;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.DatePicker;
 import java.time.LocalDate;
-import java.sql.*;
 import java.util.List;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import javafx.scene.text.Font;
-import javafx.scene.text.Text;
 import javafx.scene.text.FontWeight;
 import javafx.scene.text.FontPosture;
-import javafx.scene.layout.ColumnConstraints;
-import javafx.scene.layout.Priority;
 import java.io.IOException;
 import java.io.FileWriter;
 import javafx.scene.control.ScrollPane;
@@ -203,12 +201,6 @@ public class App extends Application {
 
     }
 
-//    // method to connect to the sql database
-//    private Connection getConnection() throws SQLException {
-//        String dbUrl = "jdbc:sqlite:baseball_batter_stats.sqlite"; // enter file name here
-//        Connection connection = DriverManager.getConnection(dbUrl);
-//        return connection;
-//    }
     // method for when the user selects the "Enter Data" button
     private void enterDataButtonClicked() {
         if (baseball_stats_db.getGames().isEmpty() || baseball_stats_db.getPlayers().isEmpty()) {
@@ -513,7 +505,7 @@ public class App extends Application {
             viewGameReportGrid.add(statsVBox, 0, 3);
 
             // Create a scene and set it to the primary stage
-            Scene enterGameScene = new Scene(viewGameReportGrid, 1000, 800);
+            Scene enterGameScene = new Scene(viewGameReportGrid, 1100, 800);
             primaryStage.setScene(enterGameScene);
         }
     }
@@ -547,6 +539,17 @@ public class App extends Application {
         ComboBox<String> endGameComboBox = new ComboBox<>();
         baseball_stats_db.getGames().forEach(game -> endGameComboBox.getItems().add("Game " + game.getGameNumber() + " - " + game.getGameDate() + " - " + game.getGameOpponentName()));
 
+        // Add a listener to the startGameComboBox to update the endGameComboBox
+        startGameComboBox.getSelectionModel().selectedItemProperty().addListener((options, oldValue, newValue) -> {
+            endGameComboBox.getItems().clear(); // Clear previous items
+            if (newValue != null) {
+                int startGameNumber = Integer.parseInt(newValue.split(" ")[1]);
+                baseball_stats_db.getGames().stream()
+                    .filter(game -> game.getGameNumber() > startGameNumber) // Ensure the end game is strictly after the start game
+                    .forEach(game -> endGameComboBox.getItems().add("Game " + game.getGameNumber() + " - " + game.getGameDate() + " - " + game.getGameOpponentName()));
+            }
+        });
+        
         // Set up buttons
         Button returnButton = new Button("Return");
         returnButton.setOnAction(event -> returnButtonClicked());
@@ -588,29 +591,22 @@ public class App extends Application {
 
             // Clear the stats box
             statsBox.getChildren().clear();
-
-            // Add the header to the stats box
+            
+            HBox playerStatsHBox = new HBox(5); // VBox for displaying each player's stats vertically
+            reportGrid.add(playerStatsHBox, 0, 3, 5, 1);
+            playerStatsHBox.setStyle("-fx-border-color: black; -fx-padding: 5;"); // Style the VBox
             Font font = Font.font("Courier New", FontWeight.BOLD, FontPosture.REGULAR, 14);
-            String header = String.format("%-10s %-25s %-5s %-3s %-3s %-3s %-3s %-3s %-3s %-3s %-3s %-5s %-3s %-2s %-3s %-3s %-5s %-2s %-2s %-6s %-3s",
-                    "Player #", "Player Name", "AVG", "AB", "R", "H", "2B", "3B", "HR", "RBI", "TB", "SLG%", "BB", "HP", "SO", "GDP", "OB%", "SF", "SH", "SB-ATT", "LOB");
-            Label headerLabel = new Label(header);
-            headerLabel.setFont(font);
-            statsBox.getChildren().add(headerLabel);
-
-            // Get the list of batters and add their stats to the stats box
-            List<Batter> batters = baseball_stats_db.getSeasonPlayerStats(startGameNumber, endGameNumber);
-            for (Batter batter : batters) {
-                String playerStats = String.format("%-10d %-25s %-5s %-3d %-3d %-3d %-3d %-3d %-3d %-3d %-3d %-5s %-3d %-2d %-3d %-3d %-5s %-2d %-2d %-6s %-3d",
-                        batter.getPlayerNumber(), batter.getPlayerName(), batter.getBatterAVGFormatted(), batter.getBatterAB(), batter.getBatterRuns(),
-                        batter.getBatterHits(), batter.getBatter2B(), batter.getBatter3B(), batter.getBatterHR(),
-                        batter.getBatterRBI(), batter.getBatterTB(), batter.getBatterSLGFormatted(), batter.getBatterBB(), batter.getBatterHP(),
-                        batter.getBatterSO(), batter.getBatterGDP(), batter.getBatterOBFormatted(), batter.getBatterSF(), batter.getBatterSH(),
-                        batter.getBatterSBSBAFormatted(), batter.getBatterLOB());
-                Label statsLabel = new Label(playerStats);
-                statsLabel.setFont(font);
-                statsLabel.setStyle("-fx-border-color: black; -fx-border-width: 1; -fx-padding: 5;");
-                statsBox.getChildren().add(statsLabel);
+            Label label = new Label();
+            label.setFont(font);
+            for (String line : buildReportLines(detailedGameReport, SPACE, startGameNumber, endGameNumber)) {
+                label = new Label(line);
+                label.setFont(font);
+                playerStatsHBox = new HBox(5); // VBox for displaying each player's stats vertically
+                playerStatsHBox.setStyle("-fx-border-color: black; -fx-padding: 5;"); // Style the VBox
+                playerStatsHBox.getChildren().add(label);
+                statsBox.getChildren().add(playerStatsHBox);
             }
+
         });
 
         // Set up event handler for save to file button
@@ -650,7 +646,8 @@ public class App extends Application {
         reportGrid.add(scrollPane, 0, 1);
 
         // Set up the scene and set it to the primary stage
-        Scene scene = new Scene(reportGrid, 800, 600);
+        //Scene scene = new Scene(reportGrid, 800, 600);
+        Scene scene = new Scene(reportGrid, 1100, 800);
         primaryStage.setScene(scene);
         primaryStage.show();
     }
@@ -693,29 +690,15 @@ public class App extends Application {
 
     private void writeMultiGameReportToFile(int startGameNumber, int endGameNumber) throws IOException {
         // Get the list of batters for the specified start and end game numbers
-        List<Batter> batters = baseball_stats_db.getSeasonPlayerStats(startGameNumber, endGameNumber);
+        //List<Batter> batters = baseball_stats_db.getSeasonPlayerStats(startGameNumber, endGameNumber);
 
         // Create a file name based on the start and end game numbers
         String fileName = "MultiGameReport_" + startGameNumber + "_to_" + endGameNumber + ".txt";
 
         // Try to create a FileWriter object to write to the file
         try (FileWriter writer = new FileWriter(fileName)) {
-            // Create a header string with the specified format
-            String header = String.format("%-10s %-30s %-5s %-3s %-3s %-3s %-3s %-3s %-3s %-3s %-3s %-5s %-3s %-2s %-3s %-3s %-5s %-2s %-2s %-6s %-3s%n",
-                    "Player #", "Player Name", "AVG", "AB", "R", "H", "2B", "3B", "HR", "RBI", "TB", "SLG%", "BB", "HP", "SO", "GDP", "OB%", "SF", "SH", "SB-ATT", "LOB");
-            // Write the header to the file
-            writer.write(header);
-
-            // Loop through each batter and write their stats to the file
-            for (Batter batter : batters) {
-                String playerStats = String.format("%-10d %-30s %-5s %-3d %-3d %-3d %-3d %-3d %-3d %-3d %-3d %-5s %-3d %-2d %-3d %-3d %-5s %-2d %-2d %-6s %-3d%n",
-                        batter.getPlayerNumber(), batter.getPlayerName(), batter.getBatterAVGFormatted(), batter.getBatterAB(), batter.getBatterRuns(),
-                        batter.getBatterHits(), batter.getBatter2B(), batter.getBatter3B(), batter.getBatterHR(),
-                        batter.getBatterRBI(), batter.getBatterTB(), batter.getBatterSLGFormatted(), batter.getBatterBB(), batter.getBatterHP(),
-                        batter.getBatterSO(), batter.getBatterGDP(), batter.getBatterOBFormatted(), batter.getBatterSF(), batter.getBatterSH(),
-                        batter.getBatterSBSBAFormatted(), batter.getBatterLOB());
-                // Write the player's stats to the file
-                writer.write(playerStats);
+            for (String line : buildReportLines(detailedGameReport, TAB, startGameNumber, endGameNumber)) {
+                writer.write(line);
             }
         }
     }
@@ -989,14 +972,6 @@ public class App extends Application {
                 error.showAndWait();
             } else {
                 baseball_stats_db.addPlayer(firstName, lastName, playerNumber);
-                //        // Create a new Player object with the entered data
-                //        Player player = new Player(playerNumber, firstName + " " + lastName, isActive);
-                //
-                //        // Add the new player to the list
-                //        players.add(player);
-
-                // Show success message
-                //String activeStatus = isActive ? "active" : "inactive";
                 Alert successAlert = new Alert(Alert.AlertType.INFORMATION);
                 successAlert.setTitle("Success");
                 successAlert.setHeaderText("Player added successfully");
@@ -1044,11 +1019,6 @@ public class App extends Application {
 
             baseball_stats_db.addGame(gameNumber, opponent, String.valueOf(gameDate));
 
-            //        Game game = new Game(gameNumber, opponent, String.valueOf(gameDate));
-            //        
-            //        // Add the new player to the list
-            //        games.add(game);
-            // Show success message
             Alert successAlert = new Alert(Alert.AlertType.INFORMATION);
             successAlert.setTitle("Success");
             successAlert.setHeaderText("Game added successfully");
@@ -1080,10 +1050,6 @@ public class App extends Application {
             errorAlert.showAndWait();
         }
 
-//        String gameInfo = ("Game " + gameNumber + " - " + gameDate + " vs " + opponent);
-//        
-//        // Add gameInfo to gameComboBox
-//        gameComboBox.getItems().add(gameInfo);
     }
 
     // function to return back to the main menu
@@ -1095,7 +1061,6 @@ public class App extends Application {
     // function to reset all data entry boxes
     private void resetButtonClicked() {
         // reset all data input, except gameComboBox
-        //gameComboBox.getSelectionModel().clearSelection();
         playerComboBox.getSelectionModel().clearSelection();
         starterCheckBox.setSelected(false);
         battingOrderField.setText("0");
