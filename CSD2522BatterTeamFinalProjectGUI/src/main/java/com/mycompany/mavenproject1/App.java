@@ -45,6 +45,7 @@ Gavin Mefford-Gibbins - 5/9/2024 - Fixed width of scrollpane in multi game repor
 Gavin Mefford-Gibbins - 5/9/2024 - Removed commented out code and fixed make the second game in the multi game report required 
     to be after the first game chosen.
 Terry Pescosolido - 5/10/24 - added file report headers; sort mulit-game by batting avg
+Terry Pescosolido - 5/10/24 - added protection against duplicate games and duplicate players
  */
 package com.mycompany.mavenproject1;
 
@@ -985,15 +986,23 @@ public class App extends Application {
                 error.setContentText("Player number must be between 0 and 99");
                 error.showAndWait();
             } else {
-                baseball_stats_db.addPlayer(firstName, lastName, playerNumber);
-                Alert successAlert = new Alert(Alert.AlertType.INFORMATION);
-                successAlert.setTitle("Success");
-                successAlert.setHeaderText("Player added successfully");
-                successAlert.setContentText("Player " + firstName + " " + lastName + " added with player number " + playerNumber); // + " and is " + activeStatus);
-                successAlert.showAndWait();
+                if (baseball_stats_db.playerExists(playerNumber)) {
+                    Alert errorAlert = new Alert(Alert.AlertType.ERROR);
+                    errorAlert.setTitle("Error");
+                    errorAlert.setHeaderText("Duplicate Player");
+                    errorAlert.setContentText("Player " + playerNumber + " already exists in database");
+                    errorAlert.showAndWait();
+                } else { 
+                    baseball_stats_db.addPlayer(firstName, lastName, playerNumber);
+                    Alert successAlert = new Alert(Alert.AlertType.INFORMATION);
+                    successAlert.setTitle("Success");
+                    successAlert.setHeaderText("Player added successfully");
+                    successAlert.setContentText("Player " + firstName + " " + lastName + " added with player number " + playerNumber); // + " and is " + activeStatus);
+                    successAlert.showAndWait();
 
-                // Clear fields
-                resetButtonClicked();
+                    // Clear fields
+                    resetButtonClicked();
+                }
             }
         } catch (NumberFormatException e) {
             // show error message for number format exception
@@ -1030,17 +1039,27 @@ public class App extends Application {
                 String dateString = gameDatePicker.getEditor().getText();
                 gameDate = LocalDate.parse(dateString, DateTimeFormatter.ofPattern("M/d/yyyy"));
             }
+            
+            if (baseball_stats_db.gameExists(gameNumber)) {
+                Alert errorAlert = new Alert(Alert.AlertType.ERROR);
+                errorAlert.setTitle("Error");
+                errorAlert.setHeaderText("Duplicate Game");
+                errorAlert.setContentText("Game " + gameNumber + " already exists in database");
+                errorAlert.showAndWait();
+            } else { 
 
-            baseball_stats_db.addGame(gameNumber, opponent, String.valueOf(gameDate));
+                baseball_stats_db.addGame(gameNumber, opponent, String.valueOf(gameDate));
 
-            Alert successAlert = new Alert(Alert.AlertType.INFORMATION);
-            successAlert.setTitle("Success");
-            successAlert.setHeaderText("Game added successfully");
-            successAlert.setContentText("Game " + gameNumber + " added with opponent " + opponent + " and date " + gameDate);
-            successAlert.showAndWait();
+                Alert successAlert = new Alert(Alert.AlertType.INFORMATION);
+                successAlert.setTitle("Success");
+                successAlert.setHeaderText("Game added successfully");
+                successAlert.setContentText("Game " + gameNumber + " added with opponent " + opponent + " and date " + gameDate);
+                successAlert.showAndWait();
+                         
+                // Clear fields
+                resetButtonClicked();      
+            }
 
-            // Clear fields
-            resetButtonClicked();
         } catch (NumberFormatException e) {
             // show error message for number format exception
             Alert errorAlert = new Alert(Alert.AlertType.ERROR);
@@ -1114,16 +1133,6 @@ public class App extends Application {
 
     public static void main(String[] args) {
         launch();
-    }
-
-    // pad with " " to the right to the given length (n)
-    public static String padRight(String s, int n) {
-        return String.format("%1$-" + n + "s", s);
-    }
-
-    // pad with " " to the left to the given length (n)
-    public static String padLeft(String s, int n) {
-        return String.format("%1$" + n + "s", s);
     }
 
 }
